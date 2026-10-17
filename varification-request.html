@@ -1,0 +1,1821 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+    /* Verification Requests main content */
+    .um-page {
+      margin-left: 242px;
+      padding: 92px clamp(14px, 2vw, 30px) 18px;
+      min-height: 100vh;
+      color: #f6f8ff;
+      background: radial-gradient(circle at 12% 0, rgba(111, 77, 255, 0.08), transparent 26rem), #030914;
+    }
+
+    .um-page,
+    .um-page * {
+      font-weight: 400 !important;
+    }
+
+    .um-topline {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .um-title h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .um-title h1 span {
+      font-weight: 400;
+    }
+
+    .um-title p {
+      margin: 0;
+      color: #aeb8cc;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .um-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 14px;
+    }
+
+    .um-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 18px;
+      color: #fff;
+      background: rgba(5, 14, 30, 0.82);
+      border: 1px solid rgba(122, 139, 174, 0.22);
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .um-btn.primary {
+      min-width: 138px;
+      border-color: rgba(151, 116, 255, 0.52);
+      background: linear-gradient(180deg, #742fff, #5a20e8);
+      box-shadow: 0 12px 26px rgba(95, 32, 232, 0.32);
+    }
+
+    .um-metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .um-metrics::-webkit-scrollbar {
+      display: none;
+    }
+
+    .um-card,
+    .um-table-panel,
+    .um-filters,
+    .um-help-strip {
+      border: 1px solid rgba(118, 134, 168, 0.15);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(7, 19, 37, 0.92), rgba(4, 12, 25, 0.95));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    }
+
+    .um-card {
+      min-height: 92px;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+    }
+
+    .um-card-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+    }
+
+    .um-purple {
+      color: #a855ff;
+      background: rgba(123, 45, 255, 0.20);
+    }
+
+    .um-green {
+      color: #00d98b;
+      background: rgba(0, 217, 139, 0.15);
+    }
+
+    .um-orange {
+      color: #ff9b00;
+      background: rgba(255, 155, 0, 0.15);
+    }
+
+    .um-red {
+      color: #ff4b5c;
+      background: rgba(255, 75, 92, 0.15);
+    }
+
+    .um-blue {
+      color: #00a3ff;
+      background: rgba(0, 163, 255, 0.15);
+    }
+
+    .um-card p {
+      margin: 0;
+    }
+
+    .um-label {
+      color: #b9c3d5;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .um-number-row {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      margin: 6px 0;
+    }
+
+    .um-number {
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 750;
+    }
+
+    .um-trend {
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .um-trend.up {
+      color: #00d98b;
+    }
+
+    .um-trend.down {
+      color: #ff4b5c;
+    }
+
+    .um-note {
+      color: #98a4b8;
+      font-size: 11px;
+    }
+
+    .um-work {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .um-table-panel {
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-color: rgba(151, 116, 255, 0.55) rgba(5, 14, 30, 0.9);
+    }
+
+    .um-table-head {
+      display: grid;
+      grid-template-columns: minmax(520px, 1fr) minmax(300px, 420px);
+      align-items: center;
+      gap: 14px;
+      padding: 14px 14px 0;
+      min-width: 1200px;
+    }
+
+    .um-tabs {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .um-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .um-tab {
+      height: 34px;
+      padding: 0 14px;
+      color: #d7deec;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .um-tab.active {
+      color: #bd37ff;
+      border-bottom-color: #bd37ff;
+    }
+
+    .um-table-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 84px;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .um-search,
+    .um-select,
+    .um-field {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 9px;
+      color: #9aa6bb;
+      background: rgba(2, 9, 20, 0.56);
+      border: 1px solid rgba(121, 142, 184, 0.18);
+      border-radius: 5px;
+    }
+
+    .um-search input,
+    .um-field input {
+      width: 100%;
+      min-width: 0;
+      color: #dce4f4;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font-size: 11px;
+    }
+
+    .um-select {
+      justify-content: space-between;
+      color: #dde5f3;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .um-table {
+      width: max(100%, 1200px);
+      min-width: 1200px;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    .um-table th {
+      height: 48px;
+      padding: 0 10px;
+      color: #99a5b8;
+      font-size: 9px;
+      font-weight: 800;
+      text-align: left;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(118, 134, 168, 0.10);
+      border-bottom: 1px solid rgba(118, 134, 168, 0.10);
+    }
+
+    .um-table td {
+      height: 47px;
+      padding: 7px 10px;
+      color: #cbd4e7;
+      font-size: 11px;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(118, 134, 168, 0.10);
+    }
+
+    .um-table th:nth-child(1),
+    .um-table td:nth-child(1) {
+      width: 18%;
+      padding-left: 18px;
+    }
+
+    .um-table th:nth-child(2),
+    .um-table td:nth-child(2) {
+      width: 13%;
+    }
+
+    .um-table th:nth-child(3),
+    .um-table td:nth-child(3) {
+      width: 12.5%;
+    }
+
+    .um-table th:nth-child(4),
+    .um-table td:nth-child(4) {
+      width: 10%;
+    }
+
+    .um-table th:nth-child(5),
+    .um-table td:nth-child(5) {
+      width: 9%;
+    }
+
+    .um-table th:nth-child(6),
+    .um-table td:nth-child(6) {
+      width: 11%;
+    }
+
+    .um-table th:nth-child(7),
+    .um-table td:nth-child(7) {
+      width: 8%;
+    }
+
+    .um-table th:nth-child(8),
+    .um-table td:nth-child(8) {
+      width: 8.5%;
+    }
+
+    .um-table th:nth-child(9),
+    .um-table td:nth-child(9) {
+      width: 10%;
+    }
+
+    .um-line {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .um-person {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .um-initial {
+      width: 25px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #d9c6ff;
+      background: linear-gradient(145deg, #4a269e, #251258);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .um-name-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .um-name {
+      color: white;
+      font-weight: 800;
+    }
+
+    .um-id {
+      margin-top: 2px;
+      color: #8e99ad;
+      font-size: 10px;
+    }
+
+    .um-pill {
+      max-width: 78px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .um-pill.ok {
+      color: #00e69a;
+      background: rgba(0, 201, 131, 0.15);
+    }
+
+    .um-pill.pending {
+      color: #ffad22;
+      background: rgba(255, 155, 0, 0.18);
+    }
+
+    .um-pill.rejected {
+      color: #ff5968;
+      background: rgba(255, 75, 92, 0.18);
+    }
+
+    .um-pill.suspended {
+      color: #d9e0eb;
+      background: rgba(148, 161, 184, 0.18);
+    }
+
+    .um-status {
+      display: block;
+      font-weight: 850;
+      line-height: 1.15;
+    }
+
+    .um-status.ok {
+      color: #00d98b;
+    }
+
+    .um-status.pending {
+      color: #ff9b00;
+    }
+
+    .um-status.rejected {
+      color: #ff4b5c;
+    }
+
+    .um-status.suspended {
+      color: #b7bfce;
+    }
+
+    .um-substatus {
+      position: relative;
+      display: block;
+      margin-top: 3px;
+      padding-left: 7px;
+      color: #a1abbf;
+      font-size: 9px;
+    }
+
+    .um-substatus::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 5px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .um-substatus.ok {
+      color: #00d98b;
+    }
+
+    .um-substatus.bad {
+      color: #ff4b5c;
+    }
+
+    .um-plan.pro {
+      color: #c844ff;
+    }
+
+    .um-plan.enterprise {
+      color: #ff9b00;
+    }
+
+    .um-plan.basic {
+      color: #00a3ff;
+    }
+
+    .um-active::before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 8px;
+      margin-right: 4px;
+      border-radius: 2px;
+      background: #0bd683;
+      vertical-align: -1px;
+    }
+
+    .um-row-actions {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .um-mini {
+      width: 21px;
+      height: 21px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      color: #c1ccdf;
+      background: rgba(10, 25, 49, 0.76);
+      border: 1px solid rgba(121, 142, 184, 0.15);
+      border-radius: 5px;
+    }
+
+    .um-mini svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .um-footer {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) auto minmax(160px, 1fr);
+      align-items: center;
+      gap: 16px;
+      padding: 11px 17px;
+      color: #bbc5d6;
+      font-size: 11px;
+      min-width: 1200px;
+    }
+
+    .um-pager,
+    .um-rows {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .um-pager {
+      justify-content: center;
+    }
+
+    .um-rows {
+      justify-content: flex-end;
+    }
+
+    .um-page-btn {
+      min-width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      padding: 0 7px;
+      color: white;
+      background: transparent;
+      border: 0;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .um-page-btn.iconic {
+      border: 1px solid rgba(121, 142, 184, 0.18);
+      background: rgba(5, 15, 30, 0.72);
+    }
+
+    .um-page-btn.active {
+      background: linear-gradient(135deg, #8932ff, #5f20f0);
+    }
+
+    .um-rows .um-select {
+      width: 52px;
+    }
+
+    .um-filters {
+      min-width: 0;
+      padding: 17px 16px;
+    }
+
+    .um-filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 21px;
+    }
+
+    .um-filter-head h2 {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .um-clear {
+      color: #b33dff;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .um-filter-group {
+      margin-bottom: 16px;
+    }
+
+    .um-filter-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .um-filters .um-field,
+    .um-filters .um-select {
+      width: 100%;
+      height: 32px;
+    }
+
+    .um-apply {
+      width: 100%;
+      height: 34px;
+      border: 0;
+      border-radius: 5px;
+      color: white;
+      background: linear-gradient(135deg, #8b2fff, #5d1ff0);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .um-help-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 12px 14px;
+    }
+
+    .um-help-item {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 13px;
+      padding: 6px 34px 8px 6px;
+      border-right: 1px solid rgba(118, 134, 168, 0.10);
+    }
+
+    .um-help-item:last-child {
+      border-right: 0;
+    }
+
+    .um-help-icon {
+      width: 35px;
+      height: 35px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #b86dff;
+      background: rgba(123, 45, 255, 0.18);
+    }
+
+    .um-help-item h3 {
+      margin: 0 0 5px;
+      font-size: 12px;
+    }
+
+    .um-help-item p {
+      margin: 0 0 12px;
+      color: #a9b4c6;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .um-help-link {
+      color: #b23dff;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    @media (max-width: 1700px) {
+      .um-page {
+        padding-inline: 18px;
+      }
+
+      .um-work {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .um-filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        align-items: end;
+      }
+
+      .um-filter-head {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+      }
+
+      .um-filter-group {
+        margin-bottom: 0;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .um-metrics {
+        grid-template-columns: repeat(5, minmax(170px, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .um-page {
+        padding: 92px 12px 24px;
+      }
+
+      .um-topline {
+        grid-template-columns: 1fr;
+      }
+
+      .um-actions {
+        justify-content: flex-start;
+      }
+
+      .um-help-strip,
+      .um-filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .um-table-head {
+        min-width: 0;
+        grid-template-columns: 1fr;
+      }
+
+      .um-table thead {
+        display: none;
+      }
+
+      .um-table,
+      .um-table tbody,
+      .um-table tr,
+      .um-table td {
+        display: block;
+        min-width: 0;
+        width: 100% !important;
+      }
+
+      .um-table tr {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(118, 134, 168, 0.10);
+      }
+
+      .um-table td {
+        height: auto;
+        min-height: 30px;
+        display: grid;
+        grid-template-columns: 126px minmax(0, 1fr);
+        gap: 12px;
+        padding: 7px 0;
+        border: 0;
+      }
+
+      .um-table td::before {
+        content: attr(data-label);
+        color: #8f9bae;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .um-table td:first-child {
+        padding-left: 0;
+      }
+
+      .um-footer {
+        min-width: 0;
+        grid-template-columns: 1fr;
+      }
+
+      .um-rows,
+      .um-pager {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .um-help-item {
+        border-right: 0;
+        border-bottom: 1px solid rgba(118, 134, 168, 0.10);
+      }
+
+      .um-help-item:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .um-page {
+        margin-left: 0;
+        padding: 16px 10px 170px;
+      }
+
+      .um-actions,
+      .um-table-tools {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .um-btn,
+      .um-btn.primary {
+        width: 100%;
+      }
+
+      .um-filters,
+      .um-help-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .um-card {
+        min-height: 82px;
+      }
+
+      .um-table td {
+        grid-template-columns: 102px minmax(0, 1fr);
+        gap: 8px;
+      }
+
+      .um-name-row {
+        flex-wrap: wrap;
+      }
+    }
+    /* Verification Requests page additions */
+    .vr-page .um-card-icon.clock { color: #ff9b00; background: rgba(255, 155, 0, 0.15); }
+    .vr-page .um-card-icon.doc { color: #00a3ff; background: rgba(0, 163, 255, 0.15); }
+    .vr-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 292px); gap: 10px; margin-bottom: 14px; }
+    .vr-side { display: grid; gap: 10px; align-content: start; min-width: 0; }
+    .vr-panel { border: 1px solid rgba(118, 134, 168, 0.15); border-radius: 8px; background: linear-gradient(180deg, rgba(7, 19, 37, 0.92), rgba(4, 12, 25, 0.95)); padding: 18px; min-width: 0; }
+    .vr-panel h2 { margin: 0 0 18px; font-size: 14px; line-height: 1.2; }
+    .vr-table-actions { display: grid; grid-template-columns: minmax(260px, 1fr) 104px 96px 124px; gap: 10px; min-width: 0; }
+    .vr-table-head { grid-template-columns: minmax(520px, 1fr) minmax(600px, 720px); }
+    .vr-table, .vr-table-head, .vr-footer { min-width: 1240px; }
+    .vr-table { width: max(100%, 1240px); }
+    .vr-table th,
+    .vr-table td { padding-left: 8px; padding-right: 8px; }
+    .vr-table th:nth-child(1), .vr-table td:nth-child(1) { width: 15%; padding-left: 14px; }
+    .vr-table th:nth-child(2), .vr-table td:nth-child(2) { width: 15%; }
+    .vr-table th:nth-child(3), .vr-table td:nth-child(3) { width: 16%; }
+    .vr-table th:nth-child(4), .vr-table td:nth-child(4) { width: 11%; }
+    .vr-table th:nth-child(5), .vr-table td:nth-child(5) { width: 18%; }
+    .vr-table th:nth-child(6), .vr-table td:nth-child(6) { width: 12%; }
+    .vr-table th:nth-child(7), .vr-table td:nth-child(7) { width: 13%; }
+    .vr-badge { height: 18px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 5px; color: #c897ff; background: rgba(112, 59, 255, 0.22); font-size: 10px; font-weight: 800; }
+    .vr-status { max-width: 100%; display: inline-flex; align-items: center; gap: 7px; min-height: 22px; padding: 0 9px; border-radius: 5px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .vr-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .vr-status.pending { color: #ff9b00; background: rgba(255, 155, 0, 0.12); }
+    .vr-status.approved { color: #00d98b; background: rgba(0, 217, 139, 0.12); }
+    .vr-status.rejected { color: #ff4b5c; background: rgba(255, 75, 92, 0.12); }
+    .vr-status.info { color: #00a3ff; background: rgba(0, 163, 255, 0.12); }
+    .vr-docs { display: inline-block; max-width: 100%; font-weight: 800; white-space: nowrap; }
+    .vr-docs.ok { color: #00d98b; }
+    .vr-docs.warn { color: #ff9b00; }
+    .vr-docs.bad { color: #ff4b5c; }
+    .vr-action { height: 34px; min-width: 94px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; color: white; border: 1px solid rgba(121, 142, 184, 0.18); border-radius: 6px; background: rgba(10, 25, 49, 0.76); font-size: 12px; font-weight: 800; }
+    .vr-action.primary { background: linear-gradient(135deg, #35128e, #29106d); border-color: rgba(151, 116, 255, 0.28); }
+    .vr-view-icon { width: 28px; height: 28px; display: grid; place-items: center; color: #b8c4d8; border: 1px solid rgba(121, 142, 184, 0.22); border-radius: 6px; background: rgba(10, 25, 49, 0.76); }
+    .vr-view-icon svg { width: 14px; height: 14px; }
+    .vr-action svg { width: 14px; height: 14px; }
+    .vr-page .um-tab { padding-inline: 16px; }
+    .vr-page .um-tabs { gap: 0; }
+    .vr-page .um-btn { min-width: 0; padding-inline: 14px; }
+    .vr-page .um-search { min-width: 0; }
+    .vr-donut { width: 128px; height: 128px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#ffad32 0 58%, #00cf81 58% 92%, #ff4255 92% 98%, #6a4dff 98% 100%); position: relative; }
+    .vr-donut::before { content: ""; position: absolute; inset: 22px; border-radius: 50%; background: #061223; }
+    .vr-donut span { position: relative; display: block; text-align: center; color: #fff; font-weight: 850; font-size: 22px; line-height: 1; }
+    .vr-donut small { display: block; margin-top: 5px; color: #9da8bc; font-size: 11px; font-weight: 500; }
+    .vr-legend { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; font-size: 11px; color: #cbd4e7; }
+    .vr-legend li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+    .vr-key { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .vr-dot { width: 11px; height: 11px; border-radius: 3px; background: #ffad32; flex: 0 0 auto; }
+    .vr-dot.green { background: #00cf81; } .vr-dot.red { background: #ff4255; } .vr-dot.blue { background: #6a4dff; }
+    .vr-filter-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 18px; }
+    .vr-filter-head h2 { margin: 0; }
+    .vr-filter-head a { color: #b33dff; font-size: 10px; font-weight: 800; text-decoration: none; }
+    @media (max-width: 1700px) { .vr-layout { grid-template-columns: 1fr; } .vr-side { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 1200px) { .vr-side { grid-template-columns: 1fr; } .vr-table-actions { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 900px) { .vr-table, .vr-table-head, .vr-footer { min-width: 0; } .vr-table-actions { grid-template-columns: 1fr; } .vr-table { width: 100%; } }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html" data-page="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html" data-page="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="um-page vr-page" aria-label="Verification Requests">
+      <section class="um-topline">
+        <div class="um-title">
+          <h1>Verification Requests</h1>
+          <p>Review and manage LEW verification requests, documents, and approvals.</p>
+        </div>
+        <div class="um-actions">
+          <button class="um-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 3H2l8 9.5V20l4-2v-5.5L22 3Z" /></svg>Filters</button>
+          <button class="um-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+          <button class="um-btn primary" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Approve All</button>
+        </div>
+      </section>
+
+      <section class="um-metrics" aria-label="Request metrics">
+        <article class="um-card"><div class="um-card-icon um-purple"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:25px;height:25px"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 2v5a5 5 0 0 1-10 0V2"/><path d="M7 22v-5a5 5 0 0 1 10 0v5"/></svg></div><div><p class="um-label">Total Requests</p><div class="um-number-row"><span class="um-number">124</span><span class="um-trend up">+ 18.4%</span></div><p class="um-note">vs last month</p></div></article>
+        <article class="um-card"><div class="um-card-icon clock"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:25px;height:25px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><p class="um-label">Pending Review</p><div class="um-number-row"><span class="um-number">72</span><span class="um-trend up">+ 12.6%</span></div><p class="um-note">vs last month</p></div></article>
+        <article class="um-card"><div class="um-card-icon um-green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:25px;height:25px"><path d="m20 6-11 11-5-5"/></svg></div><div><p class="um-label">Approved</p><div class="um-number-row"><span class="um-number">42</span><span class="um-trend up">+ 15.3%</span></div><p class="um-note">vs last month</p></div></article>
+        <article class="um-card"><div class="um-card-icon um-red"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:25px;height:25px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></div><div><p class="um-label">Rejected</p><div class="um-number-row"><span class="um-number">8</span><span class="um-trend down">- 4.2%</span></div><p class="um-note">vs last month</p></div></article>
+        <article class="um-card"><div class="um-card-icon doc"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:25px;height:25px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div><div><p class="um-label">Additional Info Requested</p><div class="um-number-row"><span class="um-number">2</span><span class="um-trend up">+ 100%</span></div><p class="um-note">vs last month</p></div></article>
+      </section>
+
+      <section class="vr-layout" aria-label="Verification requests and insights">
+        <div class="um-table-panel">
+          <div class="um-table-head vr-table-head">
+            <nav class="um-tabs" aria-label="Request tabs"><button class="um-tab active" type="button">All Requests (124)</button><button class="um-tab" type="button">Pending (72)</button><button class="um-tab" type="button">Approved (42)</button><button class="um-tab" type="button">Rejected (8)</button><button class="um-tab" type="button">Additional Info (2)</button></nav>
+            <div class="vr-table-actions"><label class="um-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search requests..."></label><button class="um-btn" type="button">Filters</button><button class="um-btn" type="button">Export</button><button class="um-btn" type="button">Approve All</button></div>
+          </div>
+          <table class="um-table vr-table">
+            <thead><tr><th>User</th><th>Email</th><th>Organization</th><th>Requested On</th><th>Status</th><th>Documents</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">RV</span><div class="um-name-row"><span class="um-name um-line">Rahul Verma</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">rahul.verma@gov.in</div></td><td data-label="Organization"><div class="um-line">Delhi Police Cyber Cell</div></td><td data-label="Requested">20 May 2025<br><span class="um-note">11:25 AM</span></td><td data-label="Status"><span class="vr-status pending">Pending Review</span></td><td data-label="Documents"><span class="vr-docs warn">3 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action primary" type="button">Review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">SI</span><div class="um-name-row"><span class="um-name um-line">Sneha Iyer</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">sneha.iyer@nic.in</div></td><td data-label="Organization"><div class="um-line">CERT-In</div></td><td data-label="Requested">20 May 2025<br><span class="um-note">10:45 AM</span></td><td data-label="Status"><span class="vr-status pending">Pending Review</span></td><td data-label="Documents"><span class="vr-docs ok">4 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action primary" type="button">Review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">AS</span><div class="um-name-row"><span class="um-name um-line">Arjun Singh</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">arjun.singh@mha.gov.in</div></td><td data-label="Organization"><div class="um-line">Ministry of Home Affairs</div></td><td data-label="Requested">19 May 2025<br><span class="um-note">04:30 PM</span></td><td data-label="Status"><span class="vr-status approved">Approved</span></td><td data-label="Documents"><span class="vr-docs ok">4 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action" type="button">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">VP</span><div class="um-name-row"><span class="um-name um-line">Vikram Patel</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">vikram.patel@police.gov.in</div></td><td data-label="Organization"><div class="um-line">Gujarat Police Cyber Cell</div></td><td data-label="Requested">19 May 2025<br><span class="um-note">02:10 PM</span></td><td data-label="Status"><span class="vr-status pending">Pending Review</span></td><td data-label="Documents"><span class="vr-docs warn">3 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action primary" type="button">Review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">NS</span><div class="um-name-row"><span class="um-name um-line">Neha Sharma</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">neha.sharma@cert.gov.in</div></td><td data-label="Organization"><div class="um-line">State CERT Team</div></td><td data-label="Requested">18 May 2025<br><span class="um-note">11:50 AM</span></td><td data-label="Status"><span class="vr-status info">Additional Info Requested</span></td><td data-label="Documents"><span class="vr-docs bad">2 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action primary" type="button">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">DK</span><div class="um-name-row"><span class="um-name um-line">Dinesh Kumar</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">dinesh.kumar@gov.in</div></td><td data-label="Organization"><div class="um-line">Uttar Pradesh Police</div></td><td data-label="Requested">18 May 2025<br><span class="um-note">10:15 AM</span></td><td data-label="Status"><span class="vr-status rejected">Rejected</span></td><td data-label="Documents"><span class="vr-docs ok">4 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action" type="button">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">PM</span><div class="um-name-row"><span class="um-name um-line">Pooja Mehta</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">pooja.mehta@gmail.com</div></td><td data-label="Organization"><div class="um-line">Maharashtra Cyber</div></td><td data-label="Requested">17 May 2025<br><span class="um-note">03:20 PM</span></td><td data-label="Status"><span class="vr-status rejected">Rejected</span></td><td data-label="Documents"><span class="vr-docs warn">2 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action" type="button">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+              <tr><td data-label="User"><div class="um-person"><span class="um-initial">RS</span><div class="um-name-row"><span class="um-name um-line">Rohit Sharma</span><span class="vr-badge">LEW</span></div></div></td><td data-label="Email"><div class="um-line">rohit.sharma@gov.in</div></td><td data-label="Organization"><div class="um-line">Rajasthan Police</div></td><td data-label="Requested">16 May 2025<br><span class="um-note">09:05 AM</span></td><td data-label="Status"><span class="vr-status pending">Pending Review</span></td><td data-label="Documents"><span class="vr-docs warn">3 / 4 Uploaded</span></td><td data-label="Actions"><div class="um-row-actions"><button class="vr-view-icon" type="button" aria-label="View request"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="vr-action primary" type="button">Review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg></button></div></td></tr>
+            </tbody>
+          </table>
+          <footer class="um-footer vr-footer"><div>Showing 1 to 10 of 124 requests</div><div class="um-pager"><button class="um-page-btn iconic" type="button">&lt;</button><button class="um-page-btn active" type="button">1</button><button class="um-page-btn" type="button">2</button><button class="um-page-btn" type="button">3</button><span>...</span><button class="um-page-btn" type="button">13</button><button class="um-page-btn iconic" type="button">&gt;</button></div><div class="um-rows"><span>Rows per page:</span><button class="um-select" type="button">10</button></div></footer>
+        </div>
+        <aside class="vr-side">
+          <section class="vr-panel"><h2>Request Statistics</h2><div class="vr-donut"><span>124<small>Total</small></span></div><ul class="vr-legend"><li><span class="vr-key"><span class="vr-dot"></span>Pending Review</span><span>72 (58.1%)</span></li><li><span class="vr-key"><span class="vr-dot green"></span>Approved</span><span>42 (33.9%)</span></li><li><span class="vr-key"><span class="vr-dot red"></span>Rejected</span><span>8 (6.5%)</span></li><li><span class="vr-key"><span class="vr-dot blue"></span>Additional Info</span><span>2 (1.6%)</span></li></ul></section>
+          <section class="vr-panel"><div class="vr-filter-head"><h2>Quick Filters</h2><a href="#">Clear All</a></div><div class="um-filter-group"><label>Status</label><button class="um-select" type="button">All Status <span>v</span></button></div><div class="um-filter-group"><label>Organization</label><button class="um-select" type="button">All Organizations <span>v</span></button></div><div class="um-filter-group"><label>Subscription Plan</label><button class="um-select" type="button">All Plans <span>v</span></button></div><div class="um-filter-group"><label>Requested On</label><button class="um-select" type="button">Select date range</button></div><button class="um-apply" type="button">Apply Filters</button></section>
+        </aside>
+      </section>
+
+      <section class="um-help-strip" aria-label="Support links">
+        <article class="um-help-item"><div class="um-help-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg></div><div><h3>Verification Process</h3><p>All LEW users must be verified before accessing OSINT tools and intelligence features.</p><a class="um-help-link" href="#">View Process Guide -&gt;</a></div></article>
+        <article class="um-help-item"><div class="um-help-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div><div><h3>Document Requirements</h3><p>Ensure all required documents are uploaded and valid for faster verification.</p><a class="um-help-link" href="#">View Requirements -&gt;</a></div></article>
+        <article class="um-help-item"><div class="um-help-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5Z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5Z"/></svg></div><div><h3>Need Help?</h3><p>If you face any issues reviewing requests, contact our support team.</p><a class="um-help-link" href="#">Contact Support -&gt;</a></div></article>
+      </section>
+    </main>
+
+  </div>
+
+                <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const navScroll = document.querySelector(".nav-scroll");
+        const scrollKey = "breachradar.sidebar.scrollTop";
+        if (navScroll) {
+            const savedTop = Number(sessionStorage.getItem(scrollKey) || "0");
+            if (savedTop > 0) {
+                navScroll.scrollTop = savedTop;
+            }
+            navScroll.addEventListener("scroll", () => {
+                sessionStorage.setItem(scrollKey, String(navScroll.scrollTop));
+            }, { passive: true });
+        }
+        const normalizePage = (page) => {
+            const value = (page || "").toLowerCase();
+            if (value === "dashboard.html") return "osint-dashboard.html";
+            if (value === "osint-inteligence.html") return "osint-intelligence.html";
+            return value;
+        };
+        const currentPage = normalizePage(decodeURIComponent(window.location.pathname.split("/").pop()) || "osint-dashboard.html");
+
+        navLinks.forEach((link) => {
+            const navText = link.textContent.replace(/\s+/g, " ").trim();
+            const sectionTitle = link.closest(".nav-section")?.querySelector(".section-heading")?.textContent.replace(/\s+/g, " ").trim() || "";
+            if (navText.startsWith("Dashboard") && sectionTitle.startsWith("OSINT")) {
+                link.href = "osint-dashboard.html";
+                link.dataset.page = "osint-dashboard.html";
+            } else if (navText.startsWith("User Management")) {
+                link.href = "user-management.html";
+                link.dataset.page = "user-management.html";
+            } else if (navText.startsWith("Verification Requests")) {
+                link.href = "varification-request.html";
+                link.dataset.page = "varification-request.html";
+            } else if (navText.startsWith("OSINT Intelligence")) {
+                link.href = "osint-intelligence.html";
+                link.dataset.page = "osint-intelligence.html";
+            }
+            const linkPage = normalizePage(link.dataset.page || decodeURIComponent(link.getAttribute("href") || ""));
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            } else {
+                link.addEventListener("click", () => {
+                    if (navScroll) {
+                        sessionStorage.setItem(scrollKey, String(navScroll.scrollTop));
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+

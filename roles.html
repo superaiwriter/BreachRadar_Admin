@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .roles-dashboard {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 92px 24px 28px;
+      background: radial-gradient(circle at 35% 16%, rgba(111, 77, 255, 0.12), transparent 25rem), linear-gradient(135deg, rgba(2, 8, 18, 0.18), rgba(5, 14, 28, 0.45));
+    }
+
+    .role-metrics,
+    .role-content,
+    .role-actions,
+    .role-tools {
+      display: grid;
+      gap: 14px;
+    }
+
+    .role-metrics {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .role-content {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .role-detail-row {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .role-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .role-card,
+    .role-panel,
+    .role-action-card {
+      min-width: 0;
+      border: 1px solid rgba(105, 128, 166, 0.15);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(8, 19, 36, 0.96), rgba(4, 12, 24, 0.96)), #071225;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 18px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .role-card {
+      position: relative;
+      min-height: 106px;
+      padding: 14px 13px;
+      overflow: hidden;
+    }
+
+    .role-card::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -34px;
+      width: 96px;
+      height: 96px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--glow), transparent 67%);
+      opacity: 0.38;
+    }
+
+    .role-card-icon,
+    .role-icon,
+    .detail-icon,
+    .action-icon {
+      display: grid;
+      place-items: center;
+      color: white;
+    }
+
+    .role-card-icon {
+      position: absolute;
+      top: 13px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      z-index: 1;
+    }
+
+    .role-kicker,
+    .role-muted,
+    .role-table th,
+    .role-search input,
+    .role-select,
+    .role-filter,
+    .role-footer,
+    .role-detail-label,
+    .permission-count {
+      color: #9faac0;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .role-value {
+      margin: 11px 0 8px;
+      color: #fff;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1;
+      font-weight: 600;
+    }
+
+    .role-change {
+      color: #18dd79;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .role-muted {
+      margin: 0;
+    }
+
+    .role-panel {
+      padding: 15px;
+    }
+
+    .role-table-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .role-tabs {
+      display: flex;
+      gap: 26px;
+      padding: 14px 15px 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.14);
+      overflow-x: auto;
+    }
+
+    .role-tab {
+      position: relative;
+      padding: 0 0 12px;
+      color: #98a5bb;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .role-tab.active {
+      color: white;
+    }
+
+    .role-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
+      background: #8d6aff;
+    }
+
+    .role-tools {
+      grid-template-columns: minmax(230px, 1fr) minmax(150px, 0.42fr) auto auto;
+      padding: 13px 15px;
+    }
+
+    .role-search,
+    .role-select,
+    .role-filter {
+      height: 34px;
+      border-radius: 6px;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+    }
+
+    .role-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      color: #8997ad;
+    }
+
+    .role-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #dce5f3;
+    }
+
+    .role-select,
+    .role-filter {
+      color: #bac5d8;
+      padding: 0 10px;
+    }
+
+    .role-filter,
+    .edit-role-btn,
+    .primary-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .role-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .role-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .role-table th,
+    .role-table td {
+      height: 50px;
+      padding: 0 13px;
+      text-align: left;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.08);
+    }
+
+    .role-table th {
+      height: 34px;
+    }
+
+    .role-table td {
+      color: #dce5f3;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .role-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .role-icon {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      border-radius: 7px;
+      background: var(--role-accent);
+    }
+
+    .role-name,
+    .detail-name,
+    .action-title,
+    .perm-name {
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .role-copy,
+    .detail-copy,
+    .action-copy {
+      color: #7f8ba2;
+      font-size: 10px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .type-pill,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      border-radius: 5px;
+      padding: 0 7px;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .type-pill {
+      color: var(--pill);
+      background: color-mix(in srgb, var(--pill) 14%, transparent);
+    }
+
+    .status-pill {
+      gap: 6px;
+      color: var(--status);
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--status);
+    }
+
+    .table-action,
+    .page-btn,
+    .page-select {
+      border-radius: 6px;
+      color: #b8c4d8;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .table-action {
+      width: 30px;
+      height: 28px;
+      cursor: pointer;
+    }
+
+    .role-footer,
+    .pager,
+    .panel-head,
+    .permission-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .role-footer {
+      padding: 13px 15px;
+    }
+
+    .pager {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .page-btn,
+    .page-select {
+      height: 28px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      cursor: pointer;
+    }
+
+    .page-btn.active {
+      color: white;
+      background: #6f4dff;
+      border-color: rgba(157, 107, 255, 0.6);
+    }
+
+    .page-select {
+      padding: 0 8px;
+    }
+
+    .panel-title {
+      margin: 0;
+      color: white;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .edit-role-btn,
+    .primary-action {
+      height: 31px;
+      border-radius: 6px;
+      color: white;
+      background: linear-gradient(180deg, #7c4dff, #5c2de4);
+      border: 1px solid rgba(157, 107, 255, 0.52);
+      font: inherit;
+      font-size: 11px;
+      padding: 0 11px;
+    }
+
+    .detail-hero {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 17px 0 15px;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.1);
+    }
+
+    .detail-icon {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 8px;
+      background: var(--role-accent);
+    }
+
+    .detail-grid,
+    .date-grid {
+      display: grid;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.1);
+    }
+
+    .detail-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .date-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .detail-stat strong {
+      display: block;
+      margin-top: 5px;
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .permission-donut {
+      width: 150px;
+      aspect-ratio: 1;
+      margin: 18px auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: conic-gradient(#8d4cff 0 65%, #3f8cff 65% 79%, #19d67b 79% 87%, #ffad35 87% 100%);
+      box-shadow: 0 0 34px rgba(141, 76, 255, 0.18);
+    }
+
+    .donut-inner {
+      width: 62%;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: inherit;
+      text-align: center;
+      background: #071225;
+      box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.36);
+    }
+
+    .donut-inner strong {
+      display: block;
+      color: white;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 600;
+    }
+
+    .donut-inner span {
+      color: #9faac0;
+      font-size: 10px;
+    }
+
+    .donut-legend,
+    .permission-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin-right: 7px;
+      border-radius: 999px;
+      background: var(--dot);
+    }
+
+    .permission-list {
+      margin-top: 14px;
+    }
+
+    .permission-track {
+      flex: 1;
+      height: 4px;
+      min-width: 86px;
+      border-radius: 999px;
+      background: rgba(116, 135, 170, 0.16);
+      overflow: hidden;
+    }
+
+    .permission-fill {
+      width: var(--size);
+      height: 100%;
+      border-radius: inherit;
+      background: #8d4cff;
+    }
+
+    .role-action-card {
+      position: relative;
+      min-height: 126px;
+      padding: 15px 140px 15px 15px;
+      overflow: hidden;
+    }
+
+    .feature-art {
+      position: absolute;
+      right: 18px;
+      bottom: 11px;
+      width: 112px;
+      height: 92px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 70% 70%, rgba(32, 221, 118, 0.72), transparent 18px), linear-gradient(145deg, rgba(141, 106, 255, 0.88), rgba(80, 48, 190, 0.16));
+      transform: perspective(180px) rotateX(13deg) rotateY(-18deg);
+      box-shadow: 0 18px 36px rgba(88, 52, 220, 0.25);
+    }
+
+    .feature-art.blue {
+      background: radial-gradient(circle at 76% 68%, rgba(63, 140, 255, 0.75), transparent 18px), linear-gradient(145deg, rgba(63, 140, 255, 0.85), rgba(42, 88, 170, 0.15));
+    }
+
+    @media (max-width: 1380px) {
+      .role-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .role-detail-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1060px) {
+      .role-metrics,
+      .role-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .role-tools {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .role-search {
+        grid-column: 1 / -1;
+      }
+
+      .role-detail-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .roles-dashboard {
+        padding: 92px 12px 180px;
+      }
+
+      .role-metrics,
+      .role-actions,
+      .role-tools,
+      .detail-grid,
+      .date-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .role-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .role-action-card {
+        padding-right: 15px;
+      }
+
+      .feature-art {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .roles-dashboard {
+        margin-left: 0;
+        padding: 18px 12px 220px;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+    /* Shared plain typography */
+    body,
+    body * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    body :is(div, p, span, a, button, input, select, textarea, label, li, td, th, small, strong, b) {
+      font-size: max(11px, 1em) !important;
+    }
+
+    body :is(h1, h2, h3, h4, h5, h6) {
+      font-size: max(14px, 1em) !important;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"  data-page="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="roles-dashboard" aria-label="Roles and permissions dashboard">
+      <section class="role-metrics" aria-label="Role metrics">
+        <article class="role-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);"><span class="role-kicker">Total Roles</span><span class="role-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-8 0v2" /><circle cx="12" cy="7" r="4" /></svg></span><h2 class="role-value">18</h2><div class="role-change">+ 12.5%</div><p class="role-muted">vs last 30 days</p></article>
+        <article class="role-card" style="--accent:#20dd76; --glow:rgba(32, 221, 118, 0.66);"><span class="role-kicker">Custom Roles</span><span class="role-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h10" /><path d="M7 13h6" /></svg></span><h2 class="role-value">12</h2><div class="role-change">+ 9.8%</div><p class="role-muted">vs last 30 days</p></article>
+        <article class="role-card" style="--accent:#3f8cff; --glow:rgba(63, 140, 255, 0.66);"><span class="role-kicker">System Roles</span><span class="role-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="4" /></svg></span><h2 class="role-value">6</h2><div class="role-change">+ 15.2%</div><p class="role-muted">vs last 30 days</p></article>
+        <article class="role-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.62);"><span class="role-kicker">Total Permissions</span><span class="role-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /></svg></span><h2 class="role-value">286</h2><div class="role-change">+ 8.4%</div><p class="role-muted">vs last 30 days</p></article>
+        <article class="role-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);"><span class="role-kicker">Assigned Users</span><span class="role-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-8 0v2" /><circle cx="12" cy="7" r="4" /></svg></span><h2 class="role-value">2,847</h2><div class="role-change">+ 18.6%</div><p class="role-muted">vs last 30 days</p></article>
+      </section>
+
+      <section class="role-content" aria-label="Roles and details">
+        <article class="role-panel role-table-panel">
+          <div class="role-tabs"><button class="role-tab active" type="button">Roles</button><button class="role-tab" type="button">Permissions</button></div>
+          <div class="role-tools">
+            <label class="role-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg><input type="search" placeholder="Search roles by name or description..." /></label>
+            <select class="role-select"><option>All Status</option><option>Active</option><option>Inactive</option></select>
+            <button class="role-filter" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg> Filters</button>
+            <button class="role-filter" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg> Export</button>
+          </div>
+          <div class="role-table-wrap">
+            <table class="role-table">
+              <thead><tr><th>Role Name</th><th>Type</th><th>Users</th><th>Permissions</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#8d4cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" /></svg></span><div><div class="role-name">Super Admin <span style="color:#f5b51d;">*</span></div><div class="role-copy">Full access to all features and settings</div></div></div></td><td><span class="type-pill" style="--pill:#8d6aff;">System</span></td><td>8</td><td>286 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#3f8cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18" /><path d="M5 8h14" /><path d="M5 16h14" /></svg></span><div><div class="role-name">Organization Admin</div><div class="role-copy">Manage organization, users and settings</div></div></div></td><td><span class="type-pill" style="--pill:#8d6aff;">System</span></td><td>156</td><td>234 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#20dd76;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20v-6" /><path d="M6 20V10" /><path d="M18 20V4" /></svg></span><div><div class="role-name">Security Manager</div><div class="role-copy">Manage security operations and alerts</div></div></div></td><td><span class="type-pill" style="--pill:#8ba0bd;">Custom</span></td><td>342</td><td>198 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#f5a11d;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21v-7" /><path d="M12 21v-9" /><path d="M20 21v-5" /></svg></span><div><div class="role-name">Analyst</div><div class="role-copy">View and analyze security data</div></div></div></td><td><span class="type-pill" style="--pill:#8ba0bd;">Custom</span></td><td>1,248</td><td>142 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#7e4dff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /></svg></span><div><div class="role-name">Viewer</div><div class="role-copy">View-only access to platform data</div></div></div></td><td><span class="type-pill" style="--pill:#8d6aff;">System</span></td><td>876</td><td>78 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#e2b51f;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2" /></svg></span><div><div class="role-name">Billing Manager</div><div class="role-copy">Manage billing and subscriptions</div></div></div></td><td><span class="type-pill" style="--pill:#8ba0bd;">Custom</span></td><td>68</td><td>96 / 286</td><td><span class="status-pill" style="--status:#ff354d;">Inactive</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#20a36b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 12 2 2 4-5" /></svg></span><div><div class="role-name">Compliance Officer</div><div class="role-copy">Manage compliance and reports</div></div></div></td><td><span class="type-pill" style="--pill:#8ba0bd;">Custom</span></td><td>89</td><td>164 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+                <tr><td><div class="role-name-cell"><span class="role-icon" style="--role-accent:#d33d86;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /></svg></span><div><div class="role-name">Support Agent</div><div class="role-copy">Manage support tickets and users</div></div></div></td><td><span class="type-pill" style="--pill:#8ba0bd;">Custom</span></td><td>60</td><td>112 / 286</td><td><span class="status-pill" style="--status:#20dd76;">Active</span></td><td><button class="table-action">...</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="role-footer"><span>Showing 1 to 8 of 18 roles</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">&gt;</button><select class="page-select"><option>10 / page</option></select></div></div>
+        </article>
+
+        <div class="role-detail-row">
+          <aside class="role-panel" aria-label="Role details">
+            <div class="panel-head"><h2 class="panel-title">Role Details</h2><button class="edit-role-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg> Edit Role</button></div>
+            <div class="detail-hero"><span class="detail-icon" style="--role-accent:#8d4cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" /></svg></span><div><div class="detail-name">Super Admin <span class="type-pill" style="--pill:#8d6aff;">System Role</span></div><p class="detail-copy">Full access to all features, settings and data across the entire platform.</p></div></div>
+            <div class="detail-grid"><div class="detail-stat"><span class="role-detail-label">Users</span><strong>8</strong></div><div class="detail-stat"><span class="role-detail-label">Permissions</span><strong>286 / 286</strong></div><div class="detail-stat"><span class="role-detail-label">Status</span><strong><span class="status-pill" style="--status:#20dd76;">Active</span></strong></div></div>
+            <div class="date-grid"><div class="detail-stat"><span class="role-detail-label">Created On</span><strong>Jun 15, 2024</strong></div><div class="detail-stat"><span class="role-detail-label">Last Updated</span><strong>May 15, 2025</strong></div></div>
+          </aside>
+
+          <aside class="role-panel" aria-label="Permissions overview">
+            <h3 class="panel-title">Permissions Overview</h3>
+            <div class="permission-donut"><div class="donut-inner"><span><strong>286</strong><span>Total Permissions</span></span></div></div>
+            <div class="donut-legend">
+              <div class="permission-row"><span class="perm-name"><span class="legend-dot" style="--dot:#8d4cff;"></span>Full Access</span><span class="permission-count">186 (65%)</span></div>
+              <div class="permission-row"><span class="perm-name"><span class="legend-dot" style="--dot:#3f8cff;"></span>Read Only</span><span class="permission-count">68 (24%)</span></div>
+              <div class="permission-row"><span class="perm-name"><span class="legend-dot" style="--dot:#19d67b;"></span>Create / Edit</span><span class="permission-count">24 (8%)</span></div>
+              <div class="permission-row"><span class="perm-name"><span class="legend-dot" style="--dot:#ffad35;"></span>Restricted</span><span class="permission-count">8 (3%)</span></div>
+            </div>
+          </aside>
+
+          <aside class="role-panel" aria-label="Permission categories">
+            <h3 class="panel-title">Permission Categories</h3>
+            <div class="permission-list">
+              <div class="permission-row"><span class="perm-name">Dashboard & Reports</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">28 / 28</span></div>
+              <div class="permission-row"><span class="perm-name">User & Team Management</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">32 / 32</span></div>
+              <div class="permission-row"><span class="perm-name">Threats & Alerts</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">26 / 26</span></div>
+              <div class="permission-row"><span class="perm-name">Scans & Monitoring</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">24 / 24</span></div>
+              <div class="permission-row"><span class="perm-name">Integrations</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">20 / 20</span></div>
+              <div class="permission-row"><span class="perm-name">Billing & Subscriptions</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">16 / 16</span></div>
+              <div class="permission-row"><span class="perm-name">System Settings</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">18 / 18</span></div>
+              <div class="permission-row"><span class="perm-name">Audit & Logs</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">14 / 14</span></div>
+              <div class="permission-row"><span class="perm-name">API & Developers</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">20 / 20</span></div>
+              <div class="permission-row"><span class="perm-name">Other</span><span class="permission-track"><span class="permission-fill" style="--size:100%;"></span></span><span class="permission-count">88 / 88</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="role-actions" aria-label="Role management actions">
+        <article class="role-action-card"><h2 class="action-title">Create Role</h2><p class="action-copy">Create a new custom role with specific permissions.</p><button class="primary-action">Create Custom Role</button><div class="feature-art"></div></article>
+        <article class="role-action-card"><h2 class="action-title">Permission Management</h2><p class="action-copy">Manage and configure permissions for roles.</p><button class="primary-action">Manage Permissions</button><div class="feature-art blue"></div></article>
+      </section>
+    </main>
+
+
+    
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

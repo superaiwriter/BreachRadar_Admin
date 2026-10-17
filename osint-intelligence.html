@@ -1,0 +1,1659 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .topbar {
+      display: none;
+    }
+
+    .osint-main {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 20px 20px 28px;
+      background:
+        radial-gradient(circle at 18% 0, rgba(111, 77, 255, 0.13), transparent 28rem),
+        linear-gradient(135deg, #020812 0%, #05101e 54%, #020812 100%);
+    }
+
+    .osint-page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .osint-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: #f6f8ff;
+      font-size: 22px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .shield-chip {
+      width: 25px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .osint-subtitle {
+      margin: 7px 0 0;
+      color: #a2adc2;
+      font-size: 13px;
+    }
+
+    .osint-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .osint-search {
+      width: min(520px, 34vw);
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 14px;
+      border: 1px solid rgba(121, 139, 176, 0.16);
+      border-radius: 7px;
+      background: #030b18;
+      color: #8190aa;
+    }
+
+    .osint-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #dbe3f2;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .admin-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 160px;
+    }
+
+    .initial-avatar {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: #0b2342;
+      color: #dfe8ff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .notify {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(121, 139, 176, 0.14);
+      background: #071225;
+      color: #d5def0;
+    }
+
+    .notify::after {
+      content: "8";
+      position: absolute;
+      top: -5px;
+      right: -4px;
+      width: 17px;
+      height: 17px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: #ff2d45;
+      color: white;
+      font-size: 9px;
+      border: 2px solid #020812;
+    }
+
+    .osint-tabs {
+      display: flex;
+      gap: 0;
+      margin: 10px 0 0;
+      border-bottom: 1px solid rgba(104, 125, 163, 0.16);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .osint-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .osint-tab {
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 22px;
+      color: #aab4c8;
+      border-bottom: 2px solid transparent;
+      text-decoration: none;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .osint-tab.active {
+      color: #c27aff;
+      border-bottom-color: #8d4cff;
+    }
+
+    .osint-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 16px;
+      padding-top: 16px;
+    }
+
+    .panel,
+    .stat-card {
+      border: 1px solid rgba(104, 125, 163, 0.13);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(8, 24, 45, 0.9), rgba(4, 13, 26, 0.96)),
+        #06101f;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 18px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      margin: 0;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .panel-copy {
+      margin: 7px 0 0;
+      color: #8793aa;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .add-btn,
+    .outline-btn {
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 15px;
+      border-radius: 6px;
+      color: white;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      background: linear-gradient(180deg, #6f4dff, #512dde);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      min-height: 92px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .stat-icon,
+    .cat-icon,
+    .action-icon {
+      display: grid;
+      place-items: center;
+      color: white;
+      border-radius: 9px;
+      background: rgba(111, 77, 255, 0.18);
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+    }
+
+    .stat-label {
+      margin: 0;
+      color: #9aa6bb;
+      font-size: 11px;
+    }
+
+    .stat-value {
+      margin: 4px 0;
+      color: #f7f9ff;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .stat-note {
+      margin: 0;
+      color: #8b96aa;
+      font-size: 11px;
+    }
+
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+      padding-top: 14px;
+      border-top: 1px solid rgba(104, 125, 163, 0.1);
+    }
+
+    .mini-search,
+    .select-btn {
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(121, 139, 176, 0.16);
+      border-radius: 6px;
+      background: #061124;
+      color: #98a5bc;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
+    .mini-search {
+      width: min(330px, 100%);
+    }
+
+    .mini-search input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #dfe7f6;
+      font: inherit;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .category-table-wrap {
+      overflow-x: auto;
+    }
+
+    .category-table {
+      width: 100%;
+      min-width: 920px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .category-table th,
+    .category-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid rgba(104, 125, 163, 0.11);
+      color: #cbd4e5;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .category-table th {
+      color: #8290a8;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .category-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .cat-icon {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      color: #bb7cff;
+      background: #24105a;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 5px;
+      color: #19d878;
+      background: rgba(24, 197, 104, 0.13);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-pill.red {
+      color: #ff4b4b;
+      background: rgba(255, 66, 66, 0.13);
+    }
+
+    .visibility-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 5px;
+      color: #17d978;
+      background: rgba(24, 197, 104, 0.12);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .visibility-pill.red {
+      color: #ff4b4b;
+      background: rgba(255, 66, 66, 0.12);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-icon {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      color: #b97cff;
+      background: rgba(111, 77, 255, 0.16);
+    }
+
+    .action-icon.danger {
+      color: #ff4b4b;
+      background: rgba(255, 66, 66, 0.13);
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+      color: #9aa6bb;
+      font-size: 12px;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .page-btn {
+      width: 29px;
+      height: 29px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      border: 1px solid rgba(121, 139, 176, 0.13);
+      background: #061124;
+      color: #ccd5e6;
+    }
+
+    .page-btn.active {
+      background: linear-gradient(180deg, #764cff, #512dde);
+      color: white;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .side-card {
+      padding: 16px;
+    }
+
+    .side-title {
+      margin: 0 0 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .donut-area {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .visibility-donut {
+      width: 92px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(#17c76a 0 90%, #ff4545 90% 100%);
+    }
+
+    .donut-center {
+      width: 58px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #06101f;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .donut-center strong {
+      display: block;
+      font-size: 19px;
+    }
+
+    .legend-list,
+    .guide-list {
+      display: grid;
+      gap: 11px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #c8d1e4;
+      font-size: 12px;
+    }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 9px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      margin-top: 3px;
+      border-radius: 3px;
+      background: #17c76a;
+    }
+
+    .legend-dot.red {
+      background: #ff4545;
+    }
+
+    .quick-action {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 13px;
+      color: #c989ff;
+      border: 1px solid rgba(121, 139, 176, 0.13);
+      border-radius: 6px;
+      background: #061124;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .quick-action small {
+      display: block;
+      margin-top: 3px;
+      color: #8793aa;
+      font-weight: 400;
+    }
+
+    .guide-list li {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+    }
+
+    .check-dot {
+      width: 17px;
+      height: 17px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 17px;
+      border-radius: 999px;
+      color: #19d878;
+      border: 1px solid currentColor;
+      font-size: 11px;
+    }
+
+    .outline-btn {
+      width: 100%;
+      margin-top: 16px;
+      background: transparent;
+      color: #c989ff;
+    }
+
+    @media (max-width: 1320px) {
+      .osint-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .right-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .right-stack .side-card:first-child {
+        grid-row: span 2;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .osint-page-head,
+      .table-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .osint-search {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .osint-main {
+        margin-left: 0;
+        padding: 18px 12px 190px;
+      }
+
+      .right-stack,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-head,
+      .table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .osint-head-actions,
+      .filter-row {
+        flex-wrap: wrap;
+      }
+
+      .admin-pill {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html" data-page="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html" data-page="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="osint-dashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="user-management.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="verification-requests.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="osint-intelligence.html" data-page="osint-intelligence.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="darkweb-M.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="Report-R.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="osint-main">
+      <section class="osint-page-head">
+        <div>
+          <h1 class="osint-title">
+            OSINT Intelligence Management
+            <span class="shield-chip" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                <path d="m9 12 2 2 4-5" />
+              </svg>
+            </span>
+          </h1>
+          <p class="osint-subtitle">Manage OSINT intelligence categories, tools and configurations for LEW access.</p>
+        </div>
+
+        <div class="osint-head-actions">
+          <label class="osint-search" aria-label="Search intelligence">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input type="search" placeholder="Search by name, category, or description..." />
+          </label>
+          <span class="notify" aria-label="8 notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+          </span>
+          <div class="admin-pill">
+            <span class="initial-avatar">SA</span>
+            <div>
+              <p class="profile-name">Super Admin</p>
+              <p class="profile-email">Super Administrator</p>
+            </div>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <nav class="osint-tabs" aria-label="OSINT management tabs">
+        <a class="osint-tab active" href="#">Categories</a>
+        <a class="osint-tab" href="#">Tools</a>
+        <a class="osint-tab" href="#">Data Sources</a>
+        <a class="osint-tab" href="#">Threat Feeds</a>
+        <a class="osint-tab" href="#">Dashboard Settings</a>
+      </nav>
+
+      <section class="osint-layout">
+        <div>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">OSINT Categories</h2>
+                <p class="panel-copy">Manage OSINT intelligence categories that will be available to LEW users.</p>
+              </div>
+              <button class="add-btn" type="button">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                Add Category
+              </button>
+            </div>
+
+            <section class="stats-grid" aria-label="Category stats">
+              <article class="stat-card">
+                <span class="stat-icon" style="color:#b977ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
+                <div><p class="stat-label">Total Categories</p><p class="stat-value">10</p><p class="stat-note">Active categories</p></div>
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon" style="color:#18d878;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg></span>
+                <div><p class="stat-label">Active</p><p class="stat-value">9</p><p class="stat-note">Visible to LEW</p></div>
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon" style="color:#f59e0b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                <div><p class="stat-label">Hidden</p><p class="stat-value">1</p><p class="stat-note">Not visible to LEW</p></div>
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon" style="color:#0ea5ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 2 8 4.5v9L12 20l-8-4.5v-9L12 2Z"/><path d="M12 11.5 20 7M12 11.5 4 7M12 11.5V20"/></svg></span>
+                <div><p class="stat-label">Total Tools</p><p class="stat-value">48</p><p class="stat-note">Across all categories</p></div>
+              </article>
+            </section>
+
+            <div class="table-tools">
+              <label class="mini-search" aria-label="Search categories">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+                <input type="search" placeholder="Search categories..." />
+              </label>
+              <div class="filter-row">
+                <button class="select-btn" type="button">All Status <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></button>
+                <button class="select-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg>Filters</button>
+              </div>
+            </div>
+
+            <div class="category-table-wrap">
+              <table class="category-table">
+                <thead>
+                  <tr>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Tools</th>
+                    <th>Status</th>
+                    <th>Visibility</th>
+                    <th>Sort Order</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Identity Intelligence</span></td><td>Search and analyze personal, professional and social media identities.</td><td>6</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>1</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg></span>Domain &amp; Infra Intel</span></td><td>Domain, DNS, hosting, SSL, ASN and infrastructure analysis.</td><td>7</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>2</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>IP &amp; Geo Intelligence</span></td><td>IP lookup, geolocation, ASN, VPN detection and IP reputation scoring.</td><td>6</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>3</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1A19.5 19.5 0 0 1 5.2 13 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg></span>Phone Intelligence</span></td><td>Phone number lookup, carrier details and SIM information.</td><td>4</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>4</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8"/><path d="M12 18v4"/></svg></span>Dark Web Intelligence</span></td><td>Monitor dark web forums, marketplaces, and leaked data.</td><td>8</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>5</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>Breach Correlation</span></td><td>Correlate and match data from breaches and leaks.</td><td>5</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>6</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m13 2-10 12h9l-1 8 10-12h-9l1-8Z"/></svg></span>Threat Intelligence</span></td><td>Real-time threat data, IOCs, malware and vulnerability intelligence.</td><td>6</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>7</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M10.4 7.3 6.6 16.7M13.6 7.3l3.8 9.4M8 19h8"/></svg></span>Relationship Mapping</span></td><td>Visualize relationships between entities, emails, domains, IPs and organizations.</td><td>4</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>8</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span>Brand Protection</span></td><td>Monitor brand abuse, phishing, typosquatting and impersonation.</td><td>1</td><td><span class="status-pill">Active</span></td><td><span class="visibility-pill">Visible to LEW</span></td><td>9</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                  <tr><td><span class="category-name"><span class="cat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><path d="M4 4l16 16"/></svg></span>Archive &amp; Historical Data</span></td><td>Access historical snapshots, archived breaches and old leaked data.</td><td>1</td><td><span class="status-pill red">Inactive</span></td><td><span class="visibility-pill red">Hidden from LEW</span></td><td>10</td><td><span class="action-buttons"><button class="action-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="action-icon danger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <span>Showing 1 to 10 of 10 categories</span>
+              <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
+              <span>Rows per page: <button class="select-btn" type="button">10 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></button></span>
+            </div>
+          </article>
+        </div>
+
+        <aside class="right-stack" aria-label="Category management side panels">
+          <article class="panel side-card">
+            <h2 class="side-title">Category Visibility</h2>
+            <p class="panel-copy">Control which categories are visible to LEW users.</p>
+            <div class="donut-area">
+              <div class="visibility-donut"><div class="donut-center"><span><strong>9</strong>Visible</span></div></div>
+              <ul class="legend-list">
+                <li class="legend-row"><span class="legend-dot"></span><span>Visible to LEW<br>9 (90%)</span></li>
+                <li class="legend-row"><span class="legend-dot red"></span><span>Hidden from LEW<br>1 (10%)</span></li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="panel side-card">
+            <h2 class="side-title">Quick Actions</h2>
+            <div class="legend-list">
+              <div class="quick-action"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add New Category</span></div>
+              <div class="quick-action"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><span>Reorder Categories<small>Drag &amp; drop to reorder</small></span></div>
+            </div>
+          </article>
+
+          <article class="panel side-card">
+            <h2 class="side-title">Category Guidelines</h2>
+            <p class="panel-copy">Follow these guidelines when managing OSINT categories.</p>
+            <ul class="guide-list">
+              <li><span class="check-dot">✓</span><span>Categories define OSINT domains</span></li>
+              <li><span class="check-dot">✓</span><span>Tools are added under categories</span></li>
+              <li><span class="check-dot">✓</span><span>Only visible categories shown to LEW</span></li>
+              <li><span class="check-dot">✓</span><span>Sort order defines display priority</span></li>
+            </ul>
+            <button class="outline-btn" type="button">View Documentation</button>
+          </article>
+
+          <article class="panel side-card">
+            <h2 class="side-title">Need Help?</h2>
+            <p class="panel-copy">Learn how to manage OSINT categories, tools and visibility settings.</p>
+            <button class="outline-btn" type="button">View Help Guide</button>
+          </article>
+        </aside>
+      </section>
+    </main>
+
+  
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const osintTabs = document.querySelectorAll(".osint-tab");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+
+        osintTabs.forEach((tab) => {
+            tab.addEventListener("click", (event) => {
+                event.preventDefault();
+                osintTabs.forEach((item) => item.classList.remove("active"));
+                tab.classList.add("active");
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,3614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      flex: 1 1 360px;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .welcome>div:last-child {
+      min-width: 0;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: clamp(180px, 24vw, 360px);
+      flex: 0 1 360px;
+      min-width: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 0;
+      max-width: 230px;
+    }
+
+    .profile>div {
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .subscriptions-dashboard {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 112px 24px 28px;
+      background:
+        radial-gradient(circle at 32% 18%, rgba(111, 77, 255, 0.12), transparent 24rem),
+        linear-gradient(135deg, rgba(2, 8, 18, 0.16), rgba(5, 14, 28, 0.44));
+    }
+
+    .subscription-heading {
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subscription-heading h1 {
+      margin: 0;
+      color: white;
+      font-size: 22px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+
+    .subscription-breadcrumb {
+      margin: 6px 0 4px;
+      color: #9aa6bb;
+      font-size: 12px;
+    }
+
+    .subscription-heading p {
+      margin: 0;
+      color: #a4afc4;
+      font-size: 12px;
+    }
+
+    .subscriptions-dashboard>.sub-grid,
+    .subscriptions-dashboard>.analytics-grid,
+    .subscriptions-dashboard>.content-grid {
+      display: none;
+    }
+
+    .subscriptions-dashboard.all-view>.sub-grid,
+    .subscriptions-dashboard.all-view>.analytics-grid,
+    .subscriptions-dashboard.all-view>.content-grid {
+      display: grid;
+    }
+
+    .subscriptions-dashboard.all-view .subscription-view {
+      display: none;
+    }
+
+    .subscription-view {
+      display: none;
+    }
+
+    .subscription-view.active {
+      display: block;
+    }
+
+    .subscriptions-dashboard.view-switching.all-view>.sub-grid,
+    .subscriptions-dashboard.view-switching.all-view>.analytics-grid,
+    .subscriptions-dashboard.view-switching.all-view>.content-grid,
+    .subscriptions-dashboard.view-switching .subscription-view.active {
+      animation: subscriptionViewLoad 180ms ease both;
+    }
+
+    @keyframes subscriptionViewLoad {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .active-sub-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .active-main-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .active-side-stack {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .active-side-stack .sub-panel {
+      min-height: 0;
+    }
+
+    .active-side-stack .sub-panel:has(.revenue-chart),
+    .active-side-stack .sub-panel:has(.chart-frame[style*="140px"]) {
+      grid-column: 1 / -1;
+    }
+
+    .active-side-stack .revenue-chart {
+      min-height: 150px;
+    }
+
+    .active-side-stack .chart-frame,
+    .active-side-stack .chart-frame svg {
+      min-height: 142px;
+    }
+
+    .active-side-stack .plan-chart {
+      min-height: 190px;
+      grid-template-columns: minmax(130px, 0.9fr) minmax(130px, 1fr);
+    }
+
+    .active-side-stack .donut {
+      width: 150px;
+    }
+
+    .active-subscription-view .sub-tools {
+      grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(120px, 0.48fr)) auto auto;
+    }
+
+    .trial-subscription-view .sub-tools {
+      grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(120px, 0.48fr)) auto auto;
+    }
+
+    .trial-subscription-view>.sub-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .past-due-subscription-view .sub-tools {
+      grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(120px, 0.48fr)) auto auto;
+    }
+
+    .cancelled-subscription-view .sub-tools {
+      grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(120px, 0.48fr)) auto auto;
+    }
+
+    .expired-subscription-view .sub-tools {
+      grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(120px, 0.48fr)) auto auto;
+    }
+
+    .days-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 6px;
+      color: var(--days);
+      background: color-mix(in srgb, var(--days) 14%, transparent);
+      border: 1px solid color-mix(in srgb, var(--days) 34%, transparent);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .trial-funnel {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(150px, 1.1fr);
+      gap: 18px;
+      align-items: center;
+      min-height: 150px;
+      margin-top: 12px;
+    }
+
+    .funnel-shape {
+      display: grid;
+      gap: 0;
+      justify-items: center;
+    }
+
+    .funnel-piece {
+      height: 34px;
+      background: var(--funnel);
+      clip-path: polygon(10% 0, 90% 0, 78% 100%, 22% 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+    }
+
+    .funnel-piece:nth-child(1) { width: 148px; background: #311867; }
+    .funnel-piece:nth-child(2) { width: 118px; background: #7a4cff; }
+    .funnel-piece:nth-child(3) { width: 86px; background: #20c878; }
+    .funnel-piece:nth-child(4) { width: 62px; background: #f0ad22; }
+    .funnel-piece:nth-child(5) { width: 52px; background: #ef3349; height: 14px; }
+
+    .expiring-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .expiring-row {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .expiring-row .org-avatar {
+      width: 24px;
+      height: 24px;
+      flex-basis: 24px;
+      font-size: 10px;
+    }
+
+    .expiring-row strong {
+      display: block;
+      color: white;
+      font-size: 12px;
+    }
+
+    .expiring-row span {
+      color: #9faac0;
+      font-size: 11px;
+    }
+
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .quick-action-tile {
+      min-height: 72px;
+      display: grid;
+      place-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid rgba(116, 135, 170, 0.14);
+      border-radius: 7px;
+      background: #08152a;
+      color: #c887ff;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .amount-row {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr) 72px;
+      align-items: center;
+      gap: 12px;
+      color: #dce5f3;
+      font-size: 12px;
+    }
+
+    .amount-row+.amount-row {
+      margin-top: 17px;
+    }
+
+    .amount-row strong {
+      color: #f2f6ff;
+      text-align: right;
+    }
+
+    .past-due-list {
+      display: grid;
+      gap: 13px;
+      margin-top: 12px;
+    }
+
+    .past-due-row {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .past-due-row strong {
+      display: block;
+      color: white;
+      font-size: 12px;
+    }
+
+    .past-due-row span {
+      color: #9faac0;
+      font-size: 11px;
+    }
+
+    .amount-red {
+      color: #ff3d4d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .reason-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      max-width: 100%;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: var(--reason);
+      background: color-mix(in srgb, var(--reason) 14%, transparent);
+      border: 1px solid color-mix(in srgb, var(--reason) 28%, transparent);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mini-bar {
+      width: 74px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(116, 135, 170, 0.14);
+      overflow: hidden;
+    }
+
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      width: var(--size);
+      border-radius: inherit;
+      background: #ff3348;
+    }
+
+    .cancelled-plans-table {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .cancelled-plans-table th,
+    .cancelled-plans-table td {
+      height: 34px;
+      padding: 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.09);
+      color: #dce5f3;
+      font-size: 11px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .cancelled-plans-table th {
+      height: 26px;
+      color: #9faac0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .cancelled-plans-table th:nth-child(2),
+    .cancelled-plans-table td:nth-child(2) {
+      width: 70px;
+      text-align: center;
+    }
+
+    .cancelled-plans-table th:nth-child(3),
+    .cancelled-plans-table td:nth-child(3) {
+      width: 92px;
+    }
+
+    .cancelled-plans-table th:nth-child(4),
+    .cancelled-plans-table td:nth-child(4) {
+      width: 92px;
+      text-align: right;
+    }
+
+    .cancelled-plan-bar {
+      width: 74px;
+      height: 3px;
+      display: block;
+      border-radius: 999px;
+      background: rgba(112, 133, 168, 0.12);
+      overflow: hidden;
+    }
+
+    .cancelled-plan-bar span {
+      display: block;
+      width: var(--size);
+      height: 100%;
+      border-radius: inherit;
+      background: #ff3348;
+    }
+
+    .reactivation-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .reactivation-stat {
+      display: grid;
+      gap: 5px;
+      padding-right: 14px;
+      border-right: 1px solid rgba(116, 135, 170, 0.12);
+    }
+
+    .reactivation-stat:last-child {
+      border-right: 0;
+    }
+
+    .recommendation-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .recommendation-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .recommendation-row strong {
+      display: block;
+      color: white;
+      font-size: 12px;
+    }
+
+    .recommendation-row span {
+      color: #9faac0;
+      font-size: 11px;
+    }
+
+    .activity-strip {
+      padding: 14px 16px;
+    }
+
+    .activity-strip .activity-list {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .activity-strip .activity-row {
+      justify-content: flex-start;
+      padding: 8px 12px;
+      border-right: 1px solid rgba(112, 133, 168, 0.12);
+    }
+
+    .activity-strip .activity-row:last-child {
+      border-right: 0;
+    }
+
+    .sub-grid,
+    .analytics-grid,
+    .content-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .sub-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .analytics-grid {
+      grid-template-columns: minmax(300px, 1.35fr) minmax(260px, 0.9fr) minmax(260px, 1fr);
+      margin-bottom: 14px;
+    }
+
+    .content-grid {
+      grid-template-columns: minmax(0, 1fr) 300px;
+      align-items: start;
+    }
+
+    .sub-card,
+    .sub-panel {
+      min-width: 0;
+      border: 1px solid rgba(105, 128, 166, 0.15);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(8, 19, 36, 0.96), rgba(4, 12, 24, 0.96)),
+        #071225;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 18px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .sub-card {
+      position: relative;
+      min-height: 106px;
+      padding: 14px 13px;
+      overflow: hidden;
+    }
+
+    .sub-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -28px -32px auto;
+      width: 96px;
+      height: 96px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--glow), transparent 67%);
+      opacity: 0.38;
+    }
+
+    .sub-card-icon {
+      position: absolute;
+      top: 13px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      z-index: 1;
+    }
+
+    .sub-kicker,
+    .sub-muted,
+    .sub-table th,
+    .filter-btn,
+    .sub-search input,
+    .sub-select,
+    .legend-text,
+    .activity-time,
+    .distribution-total {
+      color: #9faac0;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .sub-value {
+      margin: 11px 0 8px;
+      color: #fff;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1;
+      font-weight: 600;
+    }
+
+    .sub-change {
+      color: #18dd79;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .sub-change.down {
+      color: #ff4d6d;
+    }
+
+    .sub-muted {
+      margin: 0;
+    }
+
+    .sub-panel {
+      padding: 15px;
+    }
+
+    .panel-head,
+    .table-head,
+    .activity-row,
+    .distribution-row,
+    .legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      margin: 0;
+      color: white;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .panel-link {
+      color: #9d6bff;
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .mini-select {
+      height: 28px;
+      border-radius: 6px;
+      color: #d7def0;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+      font-size: 11px;
+      padding: 0 9px;
+    }
+
+    .revenue-chart {
+      margin-top: 12px;
+      min-height: 160px;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .chart-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #738098;
+      font-size: 10px;
+    }
+
+    .chart-frame {
+      position: relative;
+      min-height: 154px;
+      overflow: hidden;
+    }
+
+    .chart-frame svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      min-height: 154px;
+    }
+
+    .chart-tip {
+      position: absolute;
+      top: 58px;
+      left: 43%;
+      padding: 7px 9px;
+      border-radius: 6px;
+      color: #dce5f3;
+      background: rgba(3, 11, 24, 0.92);
+      border: 1px solid rgba(141, 106, 255, 0.28);
+      font-size: 10px;
+      text-align: center;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+    }
+
+    .chart-months {
+      grid-column: 2;
+      display: flex;
+      justify-content: space-between;
+      color: #738098;
+      font-size: 10px;
+    }
+
+    .plan-chart {
+      display: grid;
+      grid-template-columns: minmax(145px, 1fr) minmax(130px, 0.8fr);
+      align-items: center;
+      gap: 14px;
+      min-height: 230px;
+    }
+
+    .donut {
+      width: min(176px, 100%);
+      aspect-ratio: 1;
+      margin: 10px auto 0;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: conic-gradient(#8d4cff 0 45.2%, #3f8cff 45.2% 71%, #19d67b 71% 89.7%, #ffad35 89.7% 100%);
+      box-shadow: 0 0 38px rgba(141, 76, 255, 0.18);
+    }
+
+    .donut.billing {
+      background: conic-gradient(#8d4cff 0 68.4%, #a875ff 68.4% 97.1%, #1bd67b 97.1% 100%);
+    }
+
+    .donut-inner {
+      width: 58%;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: inherit;
+      text-align: center;
+      background: #071225;
+      box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.36);
+    }
+
+    .donut-number {
+      display: block;
+      color: white;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .donut-label {
+      display: block;
+      margin-top: 4px;
+      color: #9faac0;
+      font-size: 10px;
+    }
+
+    .legend-list,
+    .distribution-list,
+    .activity-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .legend-dot,
+    .activity-icon {
+      width: 9px;
+      height: 9px;
+      flex: 0 0 9px;
+      border-radius: 999px;
+      background: var(--dot);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+
+    .legend-label,
+    .activity-title,
+    .distribution-name {
+      color: #edf2fb;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .legend-count,
+    .distribution-value,
+    .activity-text {
+      color: #a4afc4;
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 400;
+    }
+
+    .billing-chart {
+      min-height: 230px;
+      display: grid;
+      grid-template-columns: minmax(140px, 0.8fr) minmax(150px, 1fr);
+      align-items: center;
+      gap: 14px;
+    }
+
+    .billing-footer {
+      margin-top: 12px;
+      padding-top: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid rgba(112, 133, 168, 0.1);
+      color: #a4afc4;
+      font-size: 12px;
+    }
+
+    .billing-footer strong {
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .table-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .sub-tabs {
+      display: flex;
+      gap: 22px;
+      padding: 14px 15px 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.14);
+      overflow-x: auto;
+    }
+
+    .sub-tab {
+      position: relative;
+      padding: 0 0 12px;
+      color: #98a5bb;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .sub-tab.active {
+      color: white;
+    }
+
+    .sub-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
+      background: #8d6aff;
+    }
+
+    .sub-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(115px, 0.7fr)) minmax(86px, auto) minmax(86px, auto);
+      gap: 10px;
+      padding: 13px 15px;
+      overflow: visible;
+    }
+
+    .sub-search,
+    .sub-select,
+    .filter-btn {
+      height: 34px;
+      min-width: 0;
+      border-radius: 6px;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+    }
+
+    .sub-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 0 10px;
+      color: #8997ad;
+    }
+
+    .sub-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #dce5f3;
+    }
+
+    .sub-select,
+    .filter-btn {
+      min-width: 0;
+      padding: 0 10px;
+      color: #bac5d8;
+    }
+
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .sub-table-wrap {
+      width: 100%;
+      overflow: visible;
+    }
+
+    .sub-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .sub-table th,
+    .sub-table td {
+      padding: 0 13px;
+      text-align: left;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.08);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .sub-table th {
+      height: 34px;
+    }
+
+    .sub-table td {
+      height: 52px;
+      color: #dce5f3;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .org-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .org-cell>div {
+      min-width: 0;
+    }
+
+    .org-avatar {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: var(--avatar);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .org-name {
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .org-domain {
+      margin-top: 2px;
+      color: #7f8ba2;
+      font-size: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .plan-pill {
+      display: inline-flex;
+      min-height: 20px;
+      align-items: center;
+      border-radius: 5px;
+      padding: 0 7px;
+      color: var(--pill);
+      background: color-mix(in srgb, var(--pill) 14%, transparent);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--status);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--status);
+    }
+
+    .table-action {
+      height: 28px;
+      min-width: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      border-radius: 6px;
+      color: #d5ddeb;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .table-more {
+      min-width: 32px;
+      padding: 0 8px;
+    }
+
+    .sub-table th:last-child,
+    .sub-table td:last-child {
+      min-width: 132px;
+      white-space: nowrap;
+      overflow: visible;
+    }
+
+    .cancelled-subscription-view,
+    .expired-subscription-view {
+      overflow-x: hidden;
+    }
+
+    .cancelled-subscription-view .sub-table-wrap,
+    .expired-subscription-view .sub-table-wrap,
+    .trial-subscription-view .sub-table-wrap,
+    .past-due-subscription-view .sub-table-wrap,
+    .subscriptions-dashboard.all-view>.content-grid .sub-table-wrap {
+      overflow-x: hidden;
+    }
+
+    .cancelled-subscription-view .sub-table,
+    .expired-subscription-view .sub-table,
+    .trial-subscription-view .sub-table,
+    .past-due-subscription-view .sub-table,
+    .subscriptions-dashboard.all-view>.content-grid .sub-table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+    }
+
+    .cancelled-subscription-view .sub-table th,
+    .cancelled-subscription-view .sub-table td,
+    .expired-subscription-view .sub-table th,
+    .expired-subscription-view .sub-table td,
+    .trial-subscription-view .sub-table th,
+    .trial-subscription-view .sub-table td,
+    .past-due-subscription-view .sub-table th,
+    .past-due-subscription-view .sub-table td,
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th,
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cancelled-subscription-view .sub-table th:nth-child(1),
+    .cancelled-subscription-view .sub-table td:nth-child(1),
+    .expired-subscription-view .sub-table th:nth-child(1),
+    .expired-subscription-view .sub-table td:nth-child(1) {
+      width: 22%;
+      min-width: 0;
+    }
+
+    .cancelled-subscription-view .sub-table th:nth-child(2),
+    .cancelled-subscription-view .sub-table td:nth-child(2),
+    .cancelled-subscription-view .sub-table th:nth-child(3),
+    .cancelled-subscription-view .sub-table td:nth-child(3),
+    .cancelled-subscription-view .sub-table th:nth-child(6),
+    .cancelled-subscription-view .sub-table td:nth-child(6),
+    .expired-subscription-view .sub-table th:nth-child(2),
+    .expired-subscription-view .sub-table td:nth-child(2),
+    .expired-subscription-view .sub-table th:nth-child(3),
+    .expired-subscription-view .sub-table td:nth-child(3),
+    .expired-subscription-view .sub-table th:nth-child(6),
+    .expired-subscription-view .sub-table td:nth-child(6) {
+      width: 10%;
+      min-width: 0;
+    }
+
+    .cancelled-subscription-view .sub-table th:nth-child(4),
+    .cancelled-subscription-view .sub-table td:nth-child(4),
+    .cancelled-subscription-view .sub-table th:nth-child(5),
+    .cancelled-subscription-view .sub-table td:nth-child(5),
+    .expired-subscription-view .sub-table th:nth-child(4),
+    .expired-subscription-view .sub-table td:nth-child(4),
+    .expired-subscription-view .sub-table th:nth-child(5),
+    .expired-subscription-view .sub-table td:nth-child(5) {
+      width: 13%;
+      min-width: 0;
+    }
+
+    .cancelled-subscription-view .sub-table th:nth-child(7),
+    .cancelled-subscription-view .sub-table td:nth-child(7),
+    .expired-subscription-view .sub-table th:nth-child(7),
+    .expired-subscription-view .sub-table td:nth-child(7) {
+      width: 15%;
+      min-width: 0;
+      max-width: none;
+    }
+
+    .cancelled-subscription-view .sub-table th:last-child,
+    .cancelled-subscription-view .sub-table td:last-child,
+    .expired-subscription-view .sub-table th:last-child,
+    .expired-subscription-view .sub-table td:last-child {
+      width: 12%;
+      min-width: 118px;
+      padding-right: 18px;
+      overflow: visible;
+    }
+
+    .trial-subscription-view .sub-table th:nth-child(1),
+    .trial-subscription-view .sub-table td:nth-child(1),
+    .past-due-subscription-view .sub-table th:nth-child(1),
+    .past-due-subscription-view .sub-table td:nth-child(1) {
+      width: 22%;
+      min-width: 0;
+    }
+
+    .trial-subscription-view .sub-table th:nth-child(2),
+    .trial-subscription-view .sub-table td:nth-child(2),
+    .trial-subscription-view .sub-table th:nth-child(3),
+    .trial-subscription-view .sub-table td:nth-child(3),
+    .trial-subscription-view .sub-table th:nth-child(6),
+    .trial-subscription-view .sub-table td:nth-child(6),
+    .past-due-subscription-view .sub-table th:nth-child(2),
+    .past-due-subscription-view .sub-table td:nth-child(2),
+    .past-due-subscription-view .sub-table th:nth-child(3),
+    .past-due-subscription-view .sub-table td:nth-child(3),
+    .past-due-subscription-view .sub-table th:nth-child(6),
+    .past-due-subscription-view .sub-table td:nth-child(6) {
+      width: 10%;
+      min-width: 0;
+    }
+
+    .trial-subscription-view .sub-table th:nth-child(4),
+    .trial-subscription-view .sub-table td:nth-child(4),
+    .trial-subscription-view .sub-table th:nth-child(5),
+    .trial-subscription-view .sub-table td:nth-child(5),
+    .trial-subscription-view .sub-table th:nth-child(7),
+    .trial-subscription-view .sub-table td:nth-child(7),
+    .past-due-subscription-view .sub-table th:nth-child(4),
+    .past-due-subscription-view .sub-table td:nth-child(4),
+    .past-due-subscription-view .sub-table th:nth-child(5),
+    .past-due-subscription-view .sub-table td:nth-child(5),
+    .past-due-subscription-view .sub-table th:nth-child(7),
+    .past-due-subscription-view .sub-table td:nth-child(7) {
+      width: 13%;
+      min-width: 0;
+    }
+
+    .trial-subscription-view .sub-table th:last-child,
+    .trial-subscription-view .sub-table td:last-child,
+    .past-due-subscription-view .sub-table th:last-child,
+    .past-due-subscription-view .sub-table td:last-child {
+      width: 12%;
+      min-width: 118px;
+      padding-right: 18px;
+      overflow: visible;
+    }
+
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(1),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(1) {
+      width: 22%;
+      min-width: 0;
+    }
+
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(2),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(2),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(3),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(3),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(4),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(4),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(7),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(7) {
+      width: 10%;
+      min-width: 0;
+    }
+
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(5),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(5),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:nth-child(6),
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:nth-child(6) {
+      width: 13%;
+      min-width: 0;
+    }
+
+    .subscriptions-dashboard.all-view>.content-grid .sub-table th:last-child,
+    .subscriptions-dashboard.all-view>.content-grid .sub-table td:last-child {
+      width: 12%;
+      min-width: 118px;
+      padding-right: 18px;
+      overflow: visible;
+    }
+
+    .cancelled-subscription-view .content-grid,
+    .expired-subscription-view .content-grid {
+      align-items: stretch;
+    }
+
+    .cancelled-subscription-view .content-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .cancelled-subscription-view .content-grid>.sub-panel,
+    .expired-subscription-view .content-grid>.sub-panel {
+      height: 100%;
+    }
+
+    .cancelled-subscription-view .content-grid>.sub-panel:has(.cancelled-plans-table) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cancelled-subscription-view .content-grid>.sub-panel:has(.cancelled-plans-table) .cancelled-plans-table {
+      flex: 1;
+    }
+
+    .cancelled-subscription-view .active-side-stack .sub-panel:has(.chart-frame[style*="140px"]) {
+      grid-column: auto;
+    }
+
+    .active-subscription-view .active-sub-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .active-subscription-view .active-main-stack,
+    .active-subscription-view .active-side-stack {
+      display: contents;
+    }
+
+    .active-subscription-view .table-panel {
+      order: 1;
+      grid-column: 1 / -1;
+    }
+
+    .active-subscription-view .activity-strip {
+      order: 2;
+      grid-column: 1;
+    }
+
+    .active-subscription-view .active-side-stack>.sub-panel:nth-child(1) {
+      order: 3;
+      grid-column: 2;
+    }
+
+    .active-subscription-view .active-side-stack>.sub-panel:nth-child(2) {
+      order: 4;
+      grid-column: 1;
+    }
+
+    .active-subscription-view .active-side-stack>.sub-panel:nth-child(3) {
+      order: 5;
+      grid-column: 2;
+    }
+
+    .active-subscription-view .active-side-stack>.sub-panel:nth-child(4) {
+      order: 6;
+      grid-column: 1 / -1;
+    }
+
+    .active-subscription-view .active-side-stack .sub-panel:has(.revenue-chart) {
+      grid-column: 2;
+    }
+
+    .active-subscription-view .activity-strip .activity-list {
+      grid-template-columns: 1fr;
+    }
+
+    .active-subscription-view .activity-strip .activity-row {
+      border-right: 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.12);
+    }
+
+    .expired-subscription-view .active-sub-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .expired-subscription-view .active-main-stack,
+    .expired-subscription-view .active-side-stack,
+    .expired-subscription-view .active-main-stack>.content-grid {
+      display: contents;
+    }
+
+    .expired-subscription-view .table-panel {
+      order: 1;
+      grid-column: 1 / -1;
+    }
+
+    .expired-subscription-view .active-main-stack>.content-grid>.sub-panel:nth-child(1) {
+      order: 2;
+      grid-column: 1;
+    }
+
+    .expired-subscription-view .active-main-stack>.content-grid>.sub-panel:nth-child(2) {
+      order: 3;
+      grid-column: 2;
+    }
+
+    .expired-subscription-view .active-main-stack>.content-grid>.sub-panel:has(.recommendation-list) {
+      order: 4;
+      grid-column: 1 !important;
+    }
+
+    .expired-subscription-view .active-side-stack>.sub-panel:nth-child(1) {
+      order: 5;
+      grid-column: 2;
+    }
+
+    .expired-subscription-view .active-side-stack>.sub-panel:nth-child(2) {
+      order: 6;
+      grid-column: 1;
+    }
+
+    .expired-subscription-view .active-side-stack>.sub-panel:nth-child(3) {
+      order: 7;
+      grid-column: 2;
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 15px;
+      color: #98a5ba;
+      font-size: 11px;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .page-btn,
+    .page-select {
+      height: 28px;
+      border-radius: 6px;
+      color: #b8c4d8;
+      background: #08152a;
+      border: 1px solid rgba(116, 135, 170, 0.16);
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      cursor: pointer;
+    }
+
+    .page-btn.active {
+      color: white;
+      background: #6f4dff;
+      border-color: rgba(157, 107, 255, 0.6);
+    }
+
+    .page-select {
+      padding: 0 8px;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .distribution-list {
+      margin-top: 16px;
+    }
+
+    .distribution-row {
+      display: grid;
+      grid-template-columns: minmax(86px, 1fr) minmax(92px, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bar-track {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(116, 135, 170, 0.16);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: var(--size);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--bar);
+    }
+
+    .distribution-total {
+      margin-top: 15px;
+      padding-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(112, 133, 168, 0.1);
+    }
+
+    .distribution-total strong {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .activity-list {
+      margin-top: 15px;
+    }
+
+    .activity-row {
+      align-items: flex-start;
+    }
+
+    .activity-left {
+      display: flex;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .activity-icon {
+      width: 24px;
+      height: 24px;
+      flex-basis: 24px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--activity);
+      font-size: 11px;
+    }
+
+    @media (max-width: 1280px) {
+      .topbar {
+        gap: 14px;
+        padding: 0 16px;
+      }
+
+      .top-actions {
+        gap: 8px;
+      }
+
+      .search-box {
+        width: clamp(150px, 18vw, 260px);
+        flex-basis: 260px;
+      }
+
+      .create-btn {
+        padding: 0 13px;
+      }
+
+      .profile {
+        max-width: 190px;
+      }
+    }
+
+    @media (max-width: 1160px) {
+      .shortcut {
+        display: none;
+      }
+
+      .search-box {
+        width: 44px;
+        flex: 0 0 44px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .search-box input {
+        width: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .profile {
+        max-width: 160px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .create-btn {
+        width: 42px;
+        padding: 0;
+        justify-content: center;
+        font-size: 0;
+      }
+
+      .create-btn .icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .profile {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1380px) {
+      .sub-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .active-sub-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .active-subscription-view .sub-tools,
+      .trial-subscription-view .sub-tools,
+      .expired-subscription-view .sub-tools {
+        grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(115px, 0.7fr)) minmax(86px, auto) minmax(86px, auto);
+      }
+
+      .active-subscription-view .sub-search,
+      .trial-subscription-view .sub-search,
+      .expired-subscription-view .sub-search {
+        grid-column: auto;
+      }
+
+      .past-due-subscription-view .sub-tools {
+        grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(115px, 0.7fr)) minmax(86px, auto) minmax(86px, auto);
+      }
+
+      .past-due-subscription-view .sub-search,
+      .cancelled-subscription-view .sub-search {
+        grid-column: auto;
+      }
+
+      .cancelled-subscription-view .sub-tools,
+      .expired-subscription-view .sub-tools {
+        grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(115px, 0.7fr)) minmax(86px, auto) minmax(86px, auto);
+      }
+
+      .activity-strip .activity-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .analytics-grid .sub-panel:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .side-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1060px) {
+      .sub-grid,
+      .side-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .active-side-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .analytics-grid .sub-panel:first-child {
+        grid-column: auto;
+      }
+
+      .sub-tools {
+        grid-template-columns: minmax(180px, 1.3fr) repeat(4, minmax(90px, 0.7fr)) minmax(72px, auto) minmax(72px, auto);
+      }
+
+      .sub-search {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .subscriptions-dashboard {
+        padding: 112px 12px 180px;
+      }
+
+      .sub-grid,
+      .side-stack,
+      .plan-chart,
+      .billing-chart,
+      .sub-tools {
+        grid-template-columns: 1fr;
+      }
+
+      .active-subscription-view .sub-tools,
+      .active-subscription-view .sub-search,
+      .trial-subscription-view .sub-tools,
+      .trial-subscription-view .sub-search,
+      .past-due-subscription-view .sub-tools,
+      .past-due-subscription-view .sub-search,
+      .cancelled-subscription-view .sub-tools,
+      .cancelled-subscription-view .sub-search,
+      .expired-subscription-view .sub-tools,
+      .expired-subscription-view .sub-search {
+        grid-template-columns: 1fr;
+        grid-column: auto;
+      }
+
+      .cancelled-subscription-view .content-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .expired-subscription-view .active-sub-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .expired-subscription-view .table-panel,
+      .active-subscription-view .table-panel,
+      .active-subscription-view .activity-strip,
+      .active-subscription-view .active-side-stack>.sub-panel,
+      .expired-subscription-view .active-main-stack>.content-grid>.sub-panel,
+      .expired-subscription-view .active-side-stack>.sub-panel {
+        grid-column: 1 !important;
+      }
+
+      .trial-funnel {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .reactivation-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .reactivation-stat {
+        border-right: 0;
+        border-bottom: 1px solid rgba(116, 135, 170, 0.12);
+        padding-bottom: 12px;
+      }
+
+      .revenue-chart {
+        grid-template-columns: 34px minmax(0, 1fr);
+      }
+
+      .table-footer,
+      .billing-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .subscriptions-dashboard {
+        margin-left: 0;
+        padding: 18px 12px 220px;
+      }
+
+      .activity-strip .activity-list {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-strip .activity-row {
+        border-right: 0;
+        border-bottom: 1px solid rgba(112, 133, 168, 0.12);
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .search-box {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+        padding: 0 9px 0 13px;
+      }
+
+      .search-box input {
+        width: 100%;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .create-btn {
+        width: auto;
+        padding: 0 13px;
+        font-size: 12px;
+      }
+
+      .profile {
+        display: flex;
+        max-width: none;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+    /* Shared plain typography */
+    body,
+    body * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    body :is(div, p, span, a, button, input, select, textarea, label, li, td, th, small, strong, b) {
+      font-size: max(11px, 1em) !important;
+    }
+
+    body :is(h1, h2, h3, h4, h5, h6) {
+      font-size: max(14px, 1em) !important;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html" data-page="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html" ><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html" data-page="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">Active Subscriptions</h2>
+          <p class="welcome-copy">Manage and monitor all active subscription billing details.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create Subscription
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="subscriptions-dashboard" aria-label="Subscriptions dashboard">
+      <section class="subscription-view active active-subscription-view" data-sub-view="active">
+        <section class="sub-grid" aria-label="Active subscription metrics">
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Total Active Plans</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 19V5"/><path d="M3 19h18"/><path d="m7 15 4-4 3 3 5-7"/></svg></span>
+            <h2 class="sub-value">2,156</h2>
+            <div class="sub-change">+ 12.6%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Monthly Recurring Revenue</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10"/><path d="M7 14h6"/></svg></span>
+            <h2 class="sub-value">$86,540</h2>
+            <div class="sub-change">+ 18.9%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Renewals This Month</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/><path d="m9 16 2 2 4-4"/></svg></span>
+            <h2 class="sub-value">342</h2>
+            <div class="sub-change">+ 15.3%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Enterprise Customers</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 19V5"/><path d="M3 19h18"/><path d="m7 15 4-4 3 3 5-7"/></svg></span>
+            <h2 class="sub-value">403</h2>
+            <div class="sub-change">+ 11.2%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#3f8cff; --glow:rgba(63, 140, 255, 0.6);">
+            <span class="sub-kicker">Active Organizations</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+            <h2 class="sub-value">1,248</h2>
+            <div class="sub-change">+ 14.7%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+            <span class="sub-kicker">Avg. Revenue Per User</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <h2 class="sub-value">$40.14</h2>
+            <div class="sub-change">+ 11.2%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+        </section>
+
+        <section class="active-sub-layout">
+          <div class="active-main-stack">
+            <article class="sub-panel table-panel">
+              <div class="sub-tabs" role="tablist" aria-label="Subscription status tabs">
+                <button class="sub-tab" type="button" data-tab="all">All Subscriptions</button>
+                <button class="sub-tab active" type="button" data-tab="active">Active</button>
+                <button class="sub-tab" type="button" data-tab="trial">Trial</button>
+                <button class="sub-tab" type="button" data-tab="past-due">Past Due</button>
+                <button class="sub-tab" type="button" data-tab="cancelled">Cancelled</button>
+                <button class="sub-tab" type="button" data-tab="expired">Expired</button>
+              </div>
+
+              <div class="sub-tools">
+                <label class="sub-search" aria-label="Search active subscriptions">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="search" placeholder="Search by organization, domain or email..." />
+                </label>
+                <select class="sub-select" aria-label="Filter by plan"><option>All Plans</option></select>
+                <select class="sub-select" aria-label="Filter by billing cycle"><option>All Billing Cycles</option></select>
+                <select class="sub-select" aria-label="Filter by industry"><option>All Industries</option></select>
+                <select class="sub-select" aria-label="Filter by org size"><option>All Org Sizes</option></select>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Filters</button>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+              </div>
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Billing Cycle</th><th>Renewal Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff5d52;">A</span><div><div class="org-name">Acme Corporation</div><div class="org-domain">acme.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>Monthly</td><td>Jun 15, 2025<br><span class="sub-change">(23 days left)</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><div class="org-name">Globex Industries</div><div class="org-domain">globex.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>28 / 50</td><td>Yearly</td><td>Aug 12, 2025<br><span class="sub-change">(81 days left)</span></td><td>$1,199.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#596273;">I</span><div><div class="org-name">Initech</div><div class="org-domain">initech.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>5 / 20</td><td>Monthly</td><td>Jun 02, 2025<br><span class="sub-change">(10 days left)</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">S</span><div><div class="org-name">Stark Industries</div><div class="org-domain">starkindustries.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>85 / 100</td><td>Yearly</td><td>Dec 25, 2025<br><span class="sub-change">(216 days left)</span></td><td>$4,999.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><div class="org-name">Wayne Enterprises</div><div class="org-domain">wayne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>18 / 50</td><td>Monthly</td><td>May 01, 2025<br><span class="sub-change">(23 days left)</span></td><td>$299.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">C</span><div><div class="org-name">Cyberdyne Systems</div><div class="org-domain">cyberdyne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>8 / 20</td><td>Monthly</td><td>Apr 20, 2025<br><span class="sub-change">(11 days left)</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><div class="org-name">Oscorp Technologies</div><div class="org-domain">oscorp.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>60 / 100</td><td>Yearly</td><td>Oct 10, 2025<br><span class="sub-change">(140 days left)</span></td><td>$4,999.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff405f;">U</span><div><div class="org-name">Umbrella Corporation</div><div class="org-domain">umbrella.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>22 / 50</td><td>Monthly</td><td>Apr 10, 2025<br><span class="sub-change" style="color:#f5a11d;">(1 day left)</span></td><td>$299.00</td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="table-footer">
+                <span>Showing 1 to 8 of 2,156 active subscriptions</span>
+                <div class="pager"><button class="page-btn" type="button">&lt;</button><button class="page-btn active" type="button">1</button><button class="page-btn" type="button">2</button><button class="page-btn" type="button">3</button><span>...</span><button class="page-btn" type="button">270</button><button class="page-btn" type="button">&gt;</button><select class="page-select" aria-label="Rows per page"><option>10 / page</option></select></div>
+              </div>
+            </article>
+
+            <article class="sub-panel activity-strip">
+              <div class="panel-head"><h2 class="panel-title">Recent Activity</h2><a class="panel-link" href="#">View All</a></div>
+              <div class="activity-list">
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#10bf67;">+</span><div><div class="activity-title">New subscription created</div><div class="activity-text">Acme Corporation</div><div class="activity-time">2 min ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#0876e4;">o</span><div><div class="activity-title">Subscription renewed</div><div class="activity-text">Globex Industries</div><div class="activity-time">15 min ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#8d4cff;">^</span><div><div class="activity-title">Plan upgraded</div><div class="activity-text">Initech</div><div class="activity-time">1 hr ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#f59e0b;">$</span><div><div class="activity-title">Payment succeeded</div><div class="activity-text">Stark Industries</div><div class="activity-time">2 hr ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Umbrella Corporation</div><div class="activity-time">3 hr ago</div></div></div></div>
+              </div>
+            </article>
+          </div>
+
+          <aside class="active-side-stack" aria-label="Active subscription analytics">
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Revenue Growth</h2><select class="mini-select"><option>This Month</option></select></div>
+              <h3 class="sub-value">$86,540 <span class="sub-change">+ 18.9%</span> <span class="sub-muted">vs last month</span></h3>
+              <div class="revenue-chart">
+                <div class="chart-axis" aria-hidden="true"><span>$100K</span><span>$75K</span><span>$50K</span><span>$25K</span><span>$0</span></div>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 540 210" preserveAspectRatio="none" aria-label="Revenue growth chart">
+                    <defs><linearGradient id="activeRevenueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7c3cff" stop-opacity="0.56"/><stop offset="100%" stop-color="#7c3cff" stop-opacity="0.04"/></linearGradient></defs>
+                    <path d="M0 184 L38 160 L76 142 L114 132 L152 108 L190 118 L228 96 L266 110 L304 104 L342 96 L380 108 L418 82 L456 76 L494 80 L540 58 L540 210 L0 210 Z" fill="url(#activeRevenueFill)"/>
+                    <path d="M0 184 L38 160 L76 142 L114 132 L152 108 L190 118 L228 96 L266 110 L304 104 L342 96 L380 108 L418 82 L456 76 L494 80 L540 58" fill="none" stroke="#8d4cff" stroke-width="3"/>
+                  </svg>
+                  <div class="chart-tip"><strong>May 15</strong><br>$42,610</div>
+                </div>
+                <div class="chart-months" aria-hidden="true"><span>May 1</span><span>May 8</span><span>May 15</span><span>May 22</span><span>May 31</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Active Plan Distribution</h2>
+              <div class="plan-chart">
+                <div class="donut"><div class="donut-inner"><span><strong class="donut-number">2,156</strong><span class="donut-label">Total</span></span></div></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#8d4cff;"></span>Free</span><span class="legend-count">45.2% (974)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#3f8cff;"></span>Pro</span><span class="legend-count">25.8% (556)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#19d67b;"></span>Business</span><span class="legend-count">18.7% (403)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffad35;"></span>Enterprise</span><span class="legend-count">10.3% (223)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Renewal Forecast</h2><select class="mini-select"><option>Next 30 Days</option></select></div>
+              <h3 class="sub-value">156 <span class="sub-muted">Upcoming Renewals</span></h3>
+              <div class="distribution-list">
+                <div class="distribution-row"><span class="distribution-name">This Week</span><div class="bar-track"><div class="bar-fill" style="--size:48%; --bar:#8d4cff;"></div></div><span class="distribution-value">28</span></div>
+                <div class="distribution-row"><span class="distribution-name">Next Week</span><div class="bar-track"><div class="bar-fill" style="--size:70%; --bar:#a875ff;"></div></div><span class="distribution-value">42</span></div>
+                <div class="distribution-row"><span class="distribution-name">Next 2 Weeks</span><div class="bar-track"><div class="bar-fill" style="--size:86%; --bar:#8d4cff;"></div></div><span class="distribution-value">86</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Customer Retention Rate</h2><select class="mini-select"><option>This Month</option></select></div>
+              <h3 class="sub-value">92.6% <span class="sub-change">+ 4.3%</span> <span class="sub-muted">vs last month</span></h3>
+              <div class="chart-frame" style="min-height:82px;">
+                <svg viewBox="0 0 360 90" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="retentionFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8d4cff" stop-opacity=".44"/><stop offset="100%" stop-color="#8d4cff" stop-opacity=".02"/></linearGradient></defs>
+                  <path d="M0 45 C20 55 34 68 52 42 S84 16 102 45 S136 68 156 42 S190 18 212 40 S250 54 270 35 S302 12 324 42 S346 58 360 34 L360 90 L0 90Z" fill="url(#retentionFill)"/>
+                  <path d="M0 45 C20 55 34 68 52 42 S84 16 102 45 S136 68 156 42 S190 18 212 40 S250 54 270 35 S302 12 324 42 S346 58 360 34" fill="none" stroke="#9d5cff" stroke-width="3"/>
+                </svg>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </section>
+
+      <section class="subscription-view trial-subscription-view" data-sub-view="trial">
+        <section class="sub-grid" aria-label="Trial subscription metrics">
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Total Trial Subscriptions</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 2v7.5L4 20a1.5 1.5 0 0 0 1.3 2h13.4A1.5 1.5 0 0 0 20 20L14 9.5V2"/><path d="M8 2h8"/></svg></span>
+            <h2 class="sub-value">156</h2>
+            <div class="sub-change">+ 8.1%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Active Trials</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m8 5 11 7-11 7Z"/></svg></span>
+            <h2 class="sub-value">128</h2>
+            <div class="sub-change">+ 12.6%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+            <span class="sub-kicker">Trials Expiring Soon (7 Days)</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <h2 class="sub-value">28</h2>
+            <div class="sub-change" style="color:#f5a11d;">+ 16.7%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#1683ff; --glow:rgba(22, 131, 255, 0.6);">
+            <span class="sub-kicker">Trial Conversions (This Month)</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>
+            <h2 class="sub-value">26</h2>
+            <div class="sub-change">+ 22.4%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Conversion Rate</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17h3l4-8 4 8 4-8h3"/></svg></span>
+            <h2 class="sub-value">16.7%</h2>
+            <div class="sub-change">+ 3.2%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Expired Trials</span>
+            <span class="sub-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></span>
+            <h2 class="sub-value">15</h2>
+            <div class="sub-change down">- 6.3%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+        </section>
+
+        <section class="active-sub-layout">
+          <div class="active-main-stack">
+            <article class="sub-panel table-panel">
+              <div class="sub-tabs" role="tablist" aria-label="Subscription status tabs">
+                <button class="sub-tab" type="button" data-tab="all">All Subscriptions</button>
+                <button class="sub-tab" type="button" data-tab="active">Active</button>
+                <button class="sub-tab active" type="button" data-tab="trial">Trial</button>
+                <button class="sub-tab" type="button" data-tab="past-due">Past Due</button>
+                <button class="sub-tab" type="button" data-tab="cancelled">Cancelled</button>
+                <button class="sub-tab" type="button" data-tab="expired">Expired</button>
+              </div>
+
+              <div class="sub-tools">
+                <label class="sub-search" aria-label="Search trial subscriptions">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="search" placeholder="Search by organization, domain or email..." />
+                </label>
+                <select class="sub-select" aria-label="Filter by plan"><option>All Plans</option></select>
+                <select class="sub-select" aria-label="Filter by industry"><option>All Industries</option></select>
+                <select class="sub-select" aria-label="Filter by org size"><option>All Org Sizes</option></select>
+                <select class="sub-select" aria-label="Filter by trial status"><option>All Trial Status</option></select>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Filters</button>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+              </div>
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Trial Started On</th><th>Trial Ends On</th><th>Days Left</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">N</span><div><div class="org-name">NovaSecure Ltd.</div><div class="org-domain">novasecure.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>May 15, 2025</td><td>May 29, 2025</td><td><span class="days-pill" style="--days:#f5a11d;">5 days left</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ef3349;">C</span><div><div class="org-name">CyberShield Inc.</div><div class="org-domain">cybershield.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>18 / 50</td><td>May 10, 2025</td><td>May 24, 2025</td><td><span class="days-pill" style="--days:#f5a11d;">Today</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">T</span><div><div class="org-name">TechDefend Solutions</div><div class="org-domain">techdefend.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>25 / 100</td><td>May 05, 2025</td><td>May 19, 2025</td><td><span class="days-pill" style="--days:#ef3349;">Expired</span></td><td><span class="status-pill" style="--status:#ef3349;">Expired</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">S</span><div><div class="org-name">SecureOps</div><div class="org-domain">secureops.io</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>8 / 20</td><td>May 12, 2025</td><td>May 26, 2025</td><td><span class="days-pill" style="--days:#ef3349;">2 days left</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">D</span><div><div class="org-name">DataFortress</div><div class="org-domain">datafortress.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>30 / 50</td><td>May 08, 2025</td><td>May 22, 2025</td><td><span class="days-pill" style="--days:#f5a11d;">3 days left</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">I</span><div><div class="org-name">InfoGuard</div><div class="org-domain">infoguard.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>6 / 20</td><td>May 16, 2025</td><td>May 30, 2025</td><td><span class="days-pill" style="--days:#19d67b;">6 days left</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">N</span><div><div class="org-name">NetDefence Corp.</div><div class="org-domain">netdefence.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>45 / 100</td><td>May 02, 2025</td><td>May 16, 2025</td><td><span class="days-pill" style="--days:#ef3349;">Expired</span></td><td><span class="status-pill" style="--status:#ef3349;">Expired</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ef3349;">C</span><div><div class="org-name">CloudWatch Security</div><div class="org-domain">cloudwatch.io</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>14 / 50</td><td>May 09, 2025</td><td>May 23, 2025</td><td><span class="days-pill" style="--days:#f5a11d;">4 days left</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="table-footer">
+                <span>Showing 1 to 8 of 156 trial subscriptions</span>
+                <div class="pager"><button class="page-btn" type="button">&lt;</button><button class="page-btn active" type="button">1</button><button class="page-btn" type="button">2</button><button class="page-btn" type="button">3</button><span>...</span><button class="page-btn" type="button">20</button><button class="page-btn" type="button">&gt;</button><select class="page-select"><option>10 / page</option></select></div>
+              </div>
+            </article>
+
+            <article class="sub-panel activity-strip">
+              <div class="panel-head"><h2 class="panel-title">Recent Trial Activity</h2><a class="panel-link" href="#">View All</a></div>
+              <div class="activity-list">
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#10bf67;">+</span><div><div class="activity-title">New trial started</div><div class="activity-text">InfoGuard</div><div class="activity-time">10 min ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#0876e4;">o</span><div><div class="activity-title">Trial converted to active</div><div class="activity-text">DataFortress</div><div class="activity-time">35 min ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">!</span><div><div class="activity-title">Trial expired</div><div class="activity-text">NetDefence Corp.</div><div class="activity-time">1 hour ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#6a6f7c;">n</span><div><div class="activity-title">Trial converted to active</div><div class="activity-text">CloudWatch Security</div><div class="activity-time">2 hours ago</div></div></div></div>
+                <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#f5a11d;">+</span><div><div class="activity-title">New trial started</div><div class="activity-text">TechDefend Solutions</div><div class="activity-time">4 hours ago</div></div></div></div>
+              </div>
+            </article>
+          </div>
+
+          <aside class="active-side-stack" aria-label="Trial analytics">
+            <article class="sub-panel">
+              <h2 class="panel-title">Trial Status Overview</h2>
+              <div class="plan-chart">
+                <div class="donut" style="background:conic-gradient(#19d67b 0 56%, #f5a11d 56% 74%, #ef3349 74% 84%, #1683ff 84% 100%);"><div class="donut-inner"><span><strong class="donut-number">156</strong><span class="donut-label">Total Trials</span></span></div></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#19d67b;"></span>Active</span><span class="legend-count">128 (82.1%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#f5a11d;"></span>Expiring Soon</span><span class="legend-count">28 (17.9%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ef3349;"></span>Expired</span><span class="legend-count">15 (9.6%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#1683ff;"></span>Converted</span><span class="legend-count">26 (16.7%)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Trial Conversion Funnel</h2>
+              <div class="trial-funnel">
+                <div class="funnel-shape"><span class="funnel-piece"></span><span class="funnel-piece"></span><span class="funnel-piece"></span><span class="funnel-piece"></span><span class="funnel-piece"></span></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label">Started Trial</span><span class="legend-count">156</span></div>
+                  <div class="legend-row"><span class="legend-label">Active Trials</span><span class="legend-count">128 (82.1%)</span></div>
+                  <div class="legend-row"><span class="legend-label">Converted</span><span class="legend-count">26 (16.7%)</span></div>
+                  <div class="legend-row"><span class="legend-label">Paid Customers</span><span class="legend-count">26 (16.7%)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Trials Expiring Soon</h2><a class="panel-link" href="#">View All</a></div>
+              <div class="expiring-list">
+                <div class="expiring-row"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">C</span><div><strong>CyberShield Inc.</strong><span>cybershield.com</span></div><span class="sub-change down">Today</span></div>
+                <div class="expiring-row"><span class="org-avatar" style="--avatar:#ef3349;">S</span><div><strong>SecureOps</strong><span>secureops.io</span></div><span class="sub-change down">2 days left</span></div>
+                <div class="expiring-row"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">D</span><div><strong>DataFortress</strong><span>datafortress.com</span></div><span class="sub-change down">3 days left</span></div>
+                <div class="expiring-row"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">C</span><div><strong>CloudWatch Security</strong><span>cloudwatch.io</span></div><span class="sub-change down">4 days left</span></div>
+                <div class="expiring-row"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">N</span><div><strong>NovaSecure Ltd.</strong><span>novasecure.com</span></div><span class="sub-change down">5 days left</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Avg. Trial Duration</h2>
+              <h3 class="sub-value">14.6 Days</h3>
+              <div class="sub-change">+ 6.2% <span class="sub-muted">vs last month</span></div>
+              <div class="chart-frame" style="min-height:100px;margin-top:10px;">
+                <svg viewBox="0 0 360 100" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="trialDurationFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8d4cff" stop-opacity=".5"/><stop offset="100%" stop-color="#8d4cff" stop-opacity=".03"/></linearGradient></defs>
+                  <path d="M0 66 L20 72 L40 60 L60 74 L80 48 L100 55 L120 62 L140 50 L160 70 L180 62 L200 35 L220 46 L240 40 L260 28 L280 52 L300 38 L320 18 L340 48 L360 42 L360 100 L0 100Z" fill="url(#trialDurationFill)"/>
+                  <path d="M0 66 L20 72 L40 60 L60 74 L80 48 L100 55 L120 62 L140 50 L160 70 L180 62 L200 35 L220 46 L240 40 L260 28 L280 52 L300 38 L320 18 L340 48 L360 42" fill="none" stroke="#9d5cff" stroke-width="3"/>
+                </svg>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </section>
+
+      <section class="subscription-view past-due-subscription-view" data-sub-view="past-due">
+        <section class="sub-grid" aria-label="Past due subscription metrics">
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Past Due Subscriptions</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5"/><path d="M12 17h.01"/></svg></span>
+            <h2 class="sub-value">42</h2>
+            <div class="sub-change down">+ 16.7%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Overdue Amount</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+            <h2 class="sub-value">$24,680</h2>
+            <div class="sub-change down">+ 12.4%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+            <span class="sub-kicker">Avg. Days Overdue</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <h2 class="sub-value">18.6</h2>
+            <div class="sub-change down">+ 3.5%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Accounts at Risk</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <h2 class="sub-value">28</h2>
+            <div class="sub-change down">- 9.8%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Recoveries This Month</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/><path d="m9 16 2 2 4-4"/></svg></span>
+            <h2 class="sub-value">$5,430</h2>
+            <div class="sub-change">+ 8.6%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Unpaid Invoices</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>
+            <h2 class="sub-value">56</h2>
+            <div class="sub-change down">- 14.3%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+        </section>
+
+        <section class="active-sub-layout">
+          <div class="active-main-stack">
+            <article class="sub-panel table-panel">
+              <div class="sub-tabs" role="tablist">
+                <button class="sub-tab" type="button" data-tab="all">All Subscriptions</button>
+                <button class="sub-tab" type="button" data-tab="active">Active</button>
+                <button class="sub-tab" type="button" data-tab="trial">Trial</button>
+                <button class="sub-tab active" type="button" data-tab="past-due">Past Due</button>
+                <button class="sub-tab" type="button" data-tab="cancelled">Cancelled</button>
+                <button class="sub-tab" type="button" data-tab="expired">Expired</button>
+              </div>
+
+              <div class="sub-tools">
+                <label class="sub-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search by organization, domain or email..." /></label>
+                <select class="sub-select"><option>All Plans</option></select>
+                <select class="sub-select"><option>All Billing Cycles</option></select>
+                <select class="sub-select"><option>All Industries</option></select>
+                <select class="sub-select"><option>All Overdue Durations</option></select>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Filters</button>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+              </div>
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Due Date</th><th>Days Overdue</th><th>Amount Due</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><div class="org-name">Globex Industries</div><div class="org-domain">globex.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>28 / 50</td><td>May 10, 2025</td><td><span class="days-pill" style="--days:#ef3349;">21 days</span></td><td>$1,199.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#596273;">I</span><div><div class="org-name">Initech</div><div class="org-domain">initech.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>5 / 20</td><td>May 12, 2025</td><td><span class="days-pill" style="--days:#ef3349;">19 days</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">S</span><div><div class="org-name">Stark Industries</div><div class="org-domain">starkindustries.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>85 / 100</td><td>May 05, 2025</td><td><span class="days-pill" style="--days:#ef3349;">26 days</span></td><td>$4,999.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><div class="org-name">Wayne Enterprises</div><div class="org-domain">wayne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>18 / 50</td><td>May 15, 2025</td><td><span class="days-pill" style="--days:#ef3349;">16 days</span></td><td>$299.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><div class="org-name">Oscorp Technologies</div><div class="org-domain">oscorp.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>60 / 100</td><td>May 01, 2025</td><td><span class="days-pill" style="--days:#ef3349;">30 days+</span></td><td>$4,999.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ef3349;">U</span><div><div class="org-name">Umbrella Corporation</div><div class="org-domain">umbrella.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>22 / 50</td><td>May 08, 2025</td><td><span class="days-pill" style="--days:#ef3349;">23 days</span></td><td>$299.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">C</span><div><div class="org-name">Cyberdyne Systems</div><div class="org-domain">cyberdyne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>8 / 20</td><td>May 13, 2025</td><td><span class="days-pill" style="--days:#ef3349;">18 days</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff5d52;">A</span><div><div class="org-name">Acme Corporation</div><div class="org-domain">acme.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>May 14, 2025</td><td><span class="days-pill" style="--days:#ef3349;">17 days</span></td><td>$99.00</td><td><span class="status-pill" style="--status:#ef3349;">Past Due</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer"><span>Showing 1 to 8 of 42 past due subscriptions</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><span>...</span><button class="page-btn">6</button><button class="page-btn">&gt;</button><select class="page-select"><option>10 / page</option></select></div></div>
+            </article>
+
+            <section class="content-grid" style="grid-template-columns:minmax(260px,.7fr) minmax(0,1fr);">
+              <article class="sub-panel">
+                <h2 class="panel-title">Quick Actions</h2>
+                <div class="quick-actions-grid">
+                  <button class="quick-action-tile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg>Send Reminders</button>
+                  <button class="quick-action-tile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>Retry Payments</button>
+                  <button class="quick-action-tile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m18 8 4 4-4 4"/></svg>Suspend Access</button>
+                  <button class="quick-action-tile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Download Report</button>
+                </div>
+              </article>
+
+              <article class="sub-panel activity-strip">
+                <div class="panel-head"><h2 class="panel-title">Recent Past Due Activity</h2><a class="panel-link">View All</a></div>
+                <div class="activity-list" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Payment failed</div><div class="activity-text">Stark Industries</div><div class="activity-time">2 hrs ago</div><div class="amount-red">$4,999.00</div></div></div></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#f5a11d;">m</span><div><div class="activity-title">Reminder sent</div><div class="activity-text">Globex Industries</div><div class="activity-time">4 hrs ago</div><div class="amount-red">$1,199.00</div></div></div></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">l</span><div><div class="activity-title">Access suspended</div><div class="activity-text">Initech</div><div class="activity-time">1 day ago</div><div class="amount-red">$99.00</div></div></div></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Payment failed</div><div class="activity-text">Cyberdyne Systems</div><div class="activity-time">1 day ago</div><div class="amount-red">$99.00</div></div></div></div>
+                </div>
+              </article>
+            </section>
+          </div>
+
+          <aside class="active-side-stack" aria-label="Past due analytics">
+            <article class="sub-panel">
+              <h2 class="panel-title">Overdue Aging Summary</h2>
+              <div class="plan-chart">
+                <div class="donut" style="background:conic-gradient(#ffad35 0 33.3%, #ef3349 33.3% 61.9%, #9d4cff 61.9% 83.3%, #1683ff 83.3% 100%);"><div class="donut-inner"><span><strong class="donut-number">42</strong><span class="donut-label">Total</span></span></div></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffad35;"></span>1 - 15 days</span><span class="legend-count">14 (33.3%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ef3349;"></span>16 - 30 days</span><span class="legend-count">12 (28.6%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#9d4cff;"></span>31 - 60 days</span><span class="legend-count">9 (21.4%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#1683ff;"></span>60+ days</span><span class="legend-count">7 (16.7%)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Overdue Amount by Aging</h2>
+              <div style="margin-top:18px;">
+                <div class="amount-row"><span>1 - 15 days</span><div class="bar-track"><div class="bar-fill" style="--size:88%;--bar:#ff2d45;"></div></div><strong>$7,120</strong></div>
+                <div class="amount-row"><span>16 - 30 days</span><div class="bar-track"><div class="bar-fill" style="--size:80%;--bar:#ff2d45;"></div></div><strong>$6,480</strong></div>
+                <div class="amount-row"><span>31 - 60 days</span><div class="bar-track"><div class="bar-fill" style="--size:64%;--bar:#ff2d45;"></div></div><strong>$5,260</strong></div>
+                <div class="amount-row"><span>60+ days</span><div class="bar-track"><div class="bar-fill" style="--size:72%;--bar:#ff2d45;"></div></div><strong>$5,820</strong></div>
+              </div>
+              <div class="chart-months" style="margin:14px 0 0 76px;"><span>$0</span><span>$2K</span><span>$4K</span><span>$6K</span><span>$8K</span></div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Top Amounts Past Due</h2><a class="panel-link">View All</a></div>
+              <div class="past-due-list">
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#eef2f8;color:#172033;">S</span><div><strong>Stark Industries</strong></div><span class="amount-red">$4,999.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><strong>Oscorp Technologies</strong></div><span class="amount-red">$4,999.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><strong>Globex Industries</strong></div><span class="amount-red">$1,199.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><strong>Wayne Enterprises</strong></div><span class="amount-red">$299.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#ef3349;">U</span><div><strong>Umbrella Corporation</strong></div><span class="amount-red">$299.00</span></div>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </section>
+
+      <section class="subscription-view cancelled-subscription-view" data-sub-view="cancelled">
+        <section class="sub-grid" aria-label="Cancelled subscription metrics">
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Cancelled (This Month)</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></span>
+            <h2 class="sub-value">42</h2>
+            <div class="sub-change down">+ 15.2%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+            <span class="sub-kicker">Cancelled (This Year)</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg></span>
+            <h2 class="sub-value">396</h2>
+            <div class="sub-change down">- 8.7%</div>
+            <p class="sub-muted">vs last year</p>
+          </article>
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">MRR Lost (This Month)</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 19V5"/><path d="M3 19h18"/><path d="m7 15 4-4 3 3 5-7"/></svg></span>
+            <h2 class="sub-value">$13,240</h2>
+            <div class="sub-change down">- 18.6%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">MRR Lost (This Year)</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 6v12"/><path d="M16 9h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/></svg></span>
+            <h2 class="sub-value">$162,540</h2>
+            <div class="sub-change down">- 12.3%</div>
+            <p class="sub-muted">vs last year</p>
+          </article>
+          <article class="sub-card" style="--accent:#1683ff; --glow:rgba(22, 131, 255, 0.6);">
+            <span class="sub-kicker">Avg. Customer Lifespan</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <h2 class="sub-value">7.2 Months</h2>
+            <div class="sub-change down">- 6.1%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Reactivation Rate</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></span>
+            <h2 class="sub-value">6.8%</h2>
+            <div class="sub-change">+ 1.9%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+        </section>
+
+        <section class="active-sub-layout">
+          <div class="active-main-stack">
+            <article class="sub-panel table-panel">
+              <div class="sub-tabs" role="tablist">
+                <button class="sub-tab" type="button" data-tab="all">All Subscriptions</button>
+                <button class="sub-tab" type="button" data-tab="active">Active</button>
+                <button class="sub-tab" type="button" data-tab="trial">Trial</button>
+                <button class="sub-tab" type="button" data-tab="past-due">Past Due</button>
+                <button class="sub-tab active" type="button" data-tab="cancelled">Cancelled</button>
+                <button class="sub-tab" type="button" data-tab="expired">Expired</button>
+              </div>
+
+              <div class="sub-tools">
+                <label class="sub-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search by organization, domain or email..." /></label>
+                <select class="sub-select"><option>All Plans</option></select>
+                <select class="sub-select"><option>All Billing Cycles</option></select>
+                <select class="sub-select"><option>All Industries</option></select>
+                <select class="sub-select"><option>All Cancellation Reasons</option></select>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Filters</button>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+              </div>
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Cancelled On</th><th>Customer Since</th><th>Amount</th><th>Reason</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#596273;">I</span><div><div class="org-name">Initech</div><div class="org-domain">initech.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>5 / 20</td><td>May 14, 2025</td><td>Jan 10, 2025<br><span class="sub-muted">(4 months)</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#ef3349;">Too Expensive</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff5d52;">A</span><div><div class="org-name">Acme Corporation</div><div class="org-domain">acme.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>May 12, 2025</td><td>Oct 05, 2024<br><span class="sub-muted">(7 months)</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#f5a11d;">Switched Provider</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><div class="org-name">Globex Industries</div><div class="org-domain">globex.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>28 / 50</td><td>May 10, 2025</td><td>Nov 20, 2024<br><span class="sub-muted">(5 months)</span></td><td>$1,199.00</td><td><span class="reason-pill" style="--reason:#f5a11d;">Not Using Enough</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ef3349;">U</span><div><div class="org-name">Umbrella Corporation</div><div class="org-domain">umbrella.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>22 / 50</td><td>May 09, 2025</td><td>Dec 15, 2024<br><span class="sub-muted">(5 months)</span></td><td>$299.00</td><td><span class="reason-pill" style="--reason:#9d4cff;">Lack of Features</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">S</span><div><div class="org-name">Stark Industries</div><div class="org-domain">starkindustries.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>85 / 100</td><td>May 07, 2025</td><td>Jul 01, 2024<br><span class="sub-muted">(10 months)</span></td><td>$4,999.00</td><td><span class="reason-pill" style="--reason:#ff8a00;">Budget Constraints</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><div class="org-name">Wayne Enterprises</div><div class="org-domain">wayne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>18 / 50</td><td>May 05, 2025</td><td>Jan 18, 2025<br><span class="sub-muted">(4 months)</span></td><td>$299.00</td><td><span class="reason-pill" style="--reason:#1683ff;">Found Better Value</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><div class="org-name">Oscorp Technologies</div><div class="org-domain">oscorp.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>60 / 100</td><td>May 03, 2025</td><td>Jun 10, 2024<br><span class="sub-muted">(11 months)</span></td><td>$4,999.00</td><td><span class="reason-pill" style="--reason:#ef3349;">Service Issues</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">C</span><div><div class="org-name">Cyberdyne Systems</div><div class="org-domain">cyberdyne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>8 / 20</td><td>May 02, 2025</td><td>Feb 28, 2025<br><span class="sub-muted">(2 months)</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#9d4cff;">Too Complex</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer"><span>Showing 1 to 8 of 42 cancelled subscriptions</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><span>...</span><button class="page-btn">6</button><button class="page-btn">&gt;</button><select class="page-select"><option>10 / page</option></select></div></div>
+            </article>
+
+            <section class="content-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(260px,.85fr);">
+              <article class="sub-panel">
+                <div class="panel-head"><h2 class="panel-title">Recent Cancelled Activity</h2><a class="panel-link">View All</a></div>
+                <div class="activity-list">
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Globex Industries</div></div></div><span class="activity-time">10 min ago</span><span class="amount-red">-$1,199.00</span></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Acme Corp.</div></div></div><span class="activity-time">45 min ago</span><span class="amount-red">-$99.00</span></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Umbrella</div></div></div><span class="activity-time">2 hours ago</span><span class="amount-red">-$99.00</span></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Umbrella Corporation</div></div></div><span class="activity-time">3 hours ago</span><span class="amount-red">-$299.00</span></div>
+                  <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ef3349;">x</span><div><div class="activity-title">Subscription cancelled</div><div class="activity-text">Wayne Enterprises</div></div></div><span class="activity-time">5 hours ago</span><span class="amount-red">-$299.00</span></div>
+                </div>
+              </article>
+
+              <article class="sub-panel">
+                <div class="panel-head"><h2 class="panel-title">Top Cancelled Plans</h2><select class="mini-select"><option>This Month</option></select></div>
+                <table class="cancelled-plans-table">
+                  <thead><tr><th>Plan</th><th>Cancelled</th><th></th><th>MRR Lost</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>18</td><td><span class="cancelled-plan-bar"><span style="--size:34%;"></span></span></td><td>$1,782.00</td></tr>
+                    <tr><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>16</td><td><span class="cancelled-plan-bar"><span style="--size:66%;"></span></span></td><td>$4,784.00</td></tr>
+                    <tr><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>8</td><td><span class="cancelled-plan-bar"><span style="--size:88%;"></span></span></td><td>$6,674.00</td></tr>
+                    <tr><td>Total</td><td>42</td><td></td><td><strong>$13,240.00</strong></td></tr>
+                  </tbody>
+                </table>
+              </article>
+            </section>
+          </div>
+
+          <aside class="active-side-stack" aria-label="Cancelled subscription analytics">
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Cancellation Trend</h2><select class="mini-select"><option>This Year</option></select></div>
+              <h3 class="sub-value">396 <span class="sub-muted">Total Cancelled</span></h3>
+              <div class="sub-change down">- 8.7% <span class="sub-muted">vs last year</span></div>
+              <div class="chart-frame" style="min-height:140px;margin-top:10px;">
+                <svg viewBox="0 0 360 150" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="cancelTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#ef3349" stop-opacity=".48"/><stop offset="100%" stop-color="#ef3349" stop-opacity=".02"/></linearGradient></defs>
+                  <path d="M0 104 L44 96 L88 91 L132 55 L176 64 L220 48 L264 88 L308 68 L360 42 L360 150 L0 150Z" fill="url(#cancelTrendFill)"/>
+                  <path d="M0 104 L44 96 L88 91 L132 55 L176 64 L220 48 L264 88 L308 68 L360 42" fill="none" stroke="#ef3349" stroke-width="3"/>
+                </svg>
+                <div class="chart-months"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Cancellation Reasons</h2>
+              <div class="plan-chart">
+                <div class="donut" style="background:conic-gradient(#ef3349 0 28.6%, #ff8a2b 28.6% 52.4%, #ffc31b 52.4% 71.4%, #9d4cff 71.4% 85.7%, #7d8797 85.7% 100%);"><div class="donut-inner"><span><strong class="donut-number">42</strong><span class="donut-label">This Month</span></span></div></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ef3349;"></span>Too Expensive</span><span class="legend-count">28.6% (12)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ff8a2b;"></span>Switched Provider</span><span class="legend-count">23.8% (10)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffc31b;"></span>Not Using Enough</span><span class="legend-count">19.0% (8)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#9d4cff;"></span>Lack of Features</span><span class="legend-count">14.3% (6)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#7d8797;"></span>Other</span><span class="legend-count">14.3% (6)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">MRR Lost</h2><select class="mini-select"><option>This Month</option></select></div>
+              <h3 class="sub-value">$13,240 <span class="sub-change down">- 18.6%</span> <span class="sub-muted">vs last month</span></h3>
+              <div class="chart-frame" style="min-height:130px;margin-top:12px;">
+                <svg viewBox="0 0 360 130" preserveAspectRatio="none" aria-hidden="true">
+                  <g fill="#ef3349">
+                    <rect x="38" y="32" width="17" height="78"/><rect x="96" y="44" width="17" height="66"/><rect x="154" y="30" width="17" height="80"/><rect x="212" y="54" width="17" height="56"/><rect x="270" y="50" width="17" height="60"/><rect x="328" y="52" width="17" height="58"/>
+                  </g>
+                </svg>
+                <div class="chart-months"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <h2 class="panel-title">Reactivation Overview</h2>
+              <div class="reactivation-grid">
+                <div class="reactivation-stat"><span class="sub-kicker">Reactivation Rate</span><h3 class="sub-value">6.8%</h3><div class="sub-change">+ 1.9%<br><span class="sub-muted">vs last month</span></div></div>
+                <div class="reactivation-stat"><span class="sub-kicker">Reactivated Customers</span><h3 class="sub-value">19</h3><div class="sub-change">+ 3<br><span class="sub-muted">vs last month</span></div></div>
+              </div>
+              <button class="filter-btn" type="button" style="width:100%;margin-top:16px;color:#b982ff;">View Reactivated Customers →</button>
+            </article>
+          </aside>
+        </section>
+      </section>
+
+      <section class="subscription-view expired-subscription-view" data-sub-view="expired">
+        <section class="sub-grid" aria-label="Expired subscription metrics">
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Expired Subscriptions</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/><path d="m15 15-6 6"/><path d="m9 15 6 6"/></svg></span>
+            <h2 class="sub-value">38</h2>
+            <div class="sub-change down">- 12.4%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#ef3349; --glow:rgba(239, 51, 73, 0.62);">
+            <span class="sub-kicker">Expired Amount</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+            <h2 class="sub-value">$18,760.00</h2>
+            <div class="sub-change down">- 14.7%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+            <span class="sub-kicker">Avg. Days Since Expired</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <h2 class="sub-value">21.6 Days</h2>
+            <div class="sub-change down">+ 1.8 Days</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+            <span class="sub-kicker">Expired This Month</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg></span>
+            <h2 class="sub-value">16</h2>
+            <div class="sub-change down">- 11.1%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+            <span class="sub-kicker">Potential Recovery</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 17 6-6 4 4 7-9"/><path d="M14 6h6v6"/></svg></span>
+            <h2 class="sub-value">$9,430.00</h2>
+            <div class="sub-change">+ 9.6%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+          <article class="sub-card" style="--accent:#1683ff; --glow:rgba(22, 131, 255, 0.6);">
+            <span class="sub-kicker">Reactivation Rate</span>
+            <span class="sub-card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></span>
+            <h2 class="sub-value">6.3%</h2>
+            <div class="sub-change down">- 0.8%</div>
+            <p class="sub-muted">vs last month</p>
+          </article>
+        </section>
+
+        <section class="active-sub-layout">
+          <div class="active-main-stack">
+            <article class="sub-panel table-panel">
+              <div class="sub-tabs" role="tablist">
+                <button class="sub-tab" type="button" data-tab="all">All Subscriptions</button>
+                <button class="sub-tab" type="button" data-tab="active">Active</button>
+                <button class="sub-tab" type="button" data-tab="trial">Trial</button>
+                <button class="sub-tab" type="button" data-tab="past-due">Past Due</button>
+                <button class="sub-tab" type="button" data-tab="cancelled">Cancelled</button>
+                <button class="sub-tab active" type="button" data-tab="expired">Expired</button>
+              </div>
+
+              <div class="sub-tools">
+                <label class="sub-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search by organization, domain or email..." /></label>
+                <select class="sub-select"><option>All Plans</option></select>
+                <select class="sub-select"><option>All Billing Cycles</option></select>
+                <select class="sub-select"><option>All Industries</option></select>
+                <select class="sub-select"><option>All Expired Reasons</option></select>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Filters</button>
+                <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Export</button>
+              </div>
+
+              <div class="sub-table-wrap">
+                <table class="sub-table">
+                  <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Expired On</th><th>Days Since Expired</th><th>Amount</th><th>Expired Reason</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff5d52;">A</span><div><div class="org-name">Acme Corporation</div><div class="org-domain">acme.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>May 10, 2025</td><td><span class="days-pill" style="--days:#ef3349;">26 days</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#ef3349;">Payment Failed</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><div class="org-name">Globex Industries</div><div class="org-domain">globex.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>28 / 50</td><td>May 08, 2025</td><td><span class="days-pill" style="--days:#ef3349;">28 days</span></td><td>$1,199.00</td><td><span class="reason-pill" style="--reason:#f5a11d;">No Payment</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#596273;">I</span><div><div class="org-name">Initech</div><div class="org-domain">initech.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>5 / 20</td><td>Apr 30, 2025</td><td><span class="days-pill" style="--days:#ef3349;">36 days</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#ef3349;">Payment Failed</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">S</span><div><div class="org-name">Stark Industries</div><div class="org-domain">starkindustries.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>85 / 100</td><td>Apr 28, 2025</td><td><span class="days-pill" style="--days:#ef3349;">38 days</span></td><td>$4,999.00</td><td><span class="reason-pill" style="--reason:#9d4cff;">No Response</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ef3349;">U</span><div><div class="org-name">Umbrella Corporation</div><div class="org-domain">umbrella.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>22 / 50</td><td>Apr 25, 2025</td><td><span class="days-pill" style="--days:#ef3349;">41 days</span></td><td>$299.00</td><td><span class="reason-pill" style="--reason:#7d8797;">Canceled by User</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><div class="org-name">Wayne Enterprises</div><div class="org-domain">wayne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td>18 / 50</td><td>Apr 20, 2025</td><td><span class="days-pill" style="--days:#ef3349;">46 days</span></td><td>$299.00</td><td><span class="reason-pill" style="--reason:#ef3349;">Payment Failed</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><div class="org-name">Oscorp Technologies</div><div class="org-domain">oscorp.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td>60 / 100</td><td>Apr 18, 2025</td><td><span class="days-pill" style="--days:#ef3349;">48 days</span></td><td>$4,999.00</td><td><span class="reason-pill" style="--reason:#f5a11d;">No Payment</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                    <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">C</span><div><div class="org-name">Cyberdyne Systems</div><div class="org-domain">cyberdyne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td>8 / 20</td><td>Apr 15, 2025</td><td><span class="days-pill" style="--days:#ef3349;">51 days</span></td><td>$99.00</td><td><span class="reason-pill" style="--reason:#9d4cff;">No Response</span></td><td><button class="table-action">View</button> <button class="table-action table-more">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer"><span>Showing 1 to 8 of 38 expired subscriptions</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><span>...</span><button class="page-btn">5</button><button class="page-btn">&gt;</button><select class="page-select"><option>10 / page</option></select></div></div>
+            </article>
+
+            <section class="content-grid" style="grid-template-columns:repeat(2,minmax(260px,1fr));">
+              <article class="sub-panel">
+                <h2 class="panel-title">Expired by Plan</h2>
+                <div class="plan-chart">
+                  <div class="donut" style="background:conic-gradient(#ffad35 0 36.8%, #1683ff 36.8% 68.4%, #8d4cff 68.4% 89.5%, #7d8797 89.5% 100%);"><div class="donut-inner"><span><strong class="donut-number">38</strong><span class="donut-label">Total</span></span></div></div>
+                  <div class="legend-list">
+                    <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffad35;"></span>Enterprise</span><span class="legend-count">14 (36.8%)</span></div>
+                    <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#1683ff;"></span>Business</span><span class="legend-count">12 (31.6%)</span></div>
+                    <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#8d4cff;"></span>Pro</span><span class="legend-count">8 (21.1%)</span></div>
+                    <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#7d8797;"></span>Other</span><span class="legend-count">4 (10.5%)</span></div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="sub-panel">
+                <h2 class="panel-title">Expired by Days Since Expired</h2>
+                <div style="margin-top:20px;">
+                  <div class="amount-row"><span>0 - 15 days</span><div class="bar-track"><div class="bar-fill" style="--size:70%;--bar:#ff2d45;"></div></div><strong>8 (21.1%)</strong></div>
+                  <div class="amount-row"><span>16 - 30 days</span><div class="bar-track"><div class="bar-fill" style="--size:86%;--bar:#ff2d45;"></div></div><strong>10 (26.3%)</strong></div>
+                  <div class="amount-row"><span>31 - 60 days</span><div class="bar-track"><div class="bar-fill" style="--size:100%;--bar:#ff2d45;"></div></div><strong>12 (31.6%)</strong></div>
+                  <div class="amount-row"><span>60+ days</span><div class="bar-track"><div class="bar-fill" style="--size:70%;--bar:#ff2d45;"></div></div><strong>8 (21.1%)</strong></div>
+                </div>
+              </article>
+
+              <article class="sub-panel" style="grid-column:1 / -1;">
+                <h2 class="panel-title">Recommended Actions</h2>
+                <div class="recommendation-list">
+                  <div class="recommendation-row"><span class="activity-icon" style="--activity:#8d4cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg></span><div><strong>Send Renewal Reminders</strong><span>Send automated emails to expired customers</span></div><button class="filter-btn">Send Now</button></div>
+                  <div class="recommendation-row"><span class="activity-icon" style="--activity:#19d67b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 12v8H4v-8"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg></span><div><strong>Offer Special Discounts</strong><span>Create win-back offers for expired customers</span></div><button class="filter-btn">Create Offer</button></div>
+                  <div class="recommendation-row"><span class="activity-icon" style="--activity:#f5a11d;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span><div><strong>Schedule Follow-ups</strong><span>Assign tasks to follow up with key accounts</span></div><button class="filter-btn">Assign Now</button></div>
+                </div>
+              </article>
+            </section>
+          </div>
+
+          <aside class="active-side-stack" aria-label="Expired subscription analytics">
+            <article class="sub-panel">
+              <h2 class="panel-title">Expired Overview</h2>
+              <div class="plan-chart">
+                <div class="donut" style="background:conic-gradient(#ef3349 0 39.5%, #ffad35 39.5% 65.8%, #8d4cff 65.8% 86.9%, #7d8797 86.9% 100%);"><div class="donut-inner"><span><strong class="donut-number">38</strong><span class="donut-label">Total Expired</span></span></div></div>
+                <div class="legend-list">
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ef3349;"></span>Payment Failed</span><span class="legend-count">15 (39.5%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffad35;"></span>No Payment</span><span class="legend-count">10 (26.3%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#8d4cff;"></span>No Response</span><span class="legend-count">8 (21.1%)</span></div>
+                  <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#7d8797;"></span>Canceled by User</span><span class="legend-count">5 (13.2%)</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Expired Amount Over Time</h2><select class="mini-select"><option>This Year</option></select></div>
+              <h3 class="sub-value">$18,760.00 <span class="sub-change down">- 14.7%</span> <span class="sub-muted">vs last year</span></h3>
+              <div class="chart-frame" style="min-height:140px;margin-top:10px;">
+                <svg viewBox="0 0 360 150" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id="expiredAmountFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#ef3349" stop-opacity=".46"/><stop offset="100%" stop-color="#ef3349" stop-opacity=".02"/></linearGradient></defs>
+                  <path d="M0 104 L60 78 L120 46 L180 48 L220 40 L280 86 L360 52 L360 150 L0 150Z" fill="url(#expiredAmountFill)"/>
+                  <path d="M0 104 L60 78 L120 46 L180 48 L220 40 L280 86 L360 52" fill="none" stroke="#ef3349" stroke-width="3"/>
+                </svg>
+                <div class="chart-months"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+              </div>
+            </article>
+
+            <article class="sub-panel">
+              <div class="panel-head"><h2 class="panel-title">Top Expired Amounts</h2><a class="panel-link">View All</a></div>
+              <div class="past-due-list">
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">S</span><div><strong>Stark Industries</strong></div><span class="amount-red">$4,999.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><strong>Oscorp Technologies</strong></div><span class="amount-red">$4,999.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#d7e0f2;color:#172033;">G</span><div><strong>Globex Industries</strong></div><span class="amount-red">$1,199.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#ef3349;">U</span><div><strong>Umbrella Corporation</strong></div><span class="amount-red">$299.00</span></div>
+                <div class="past-due-row"><span class="org-avatar" style="--avatar:#2f405d;">W</span><div><strong>Wayne Enterprises</strong></div><span class="amount-red">$299.00</span></div>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </section>
+
+      <section class="sub-grid" aria-label="Subscription metrics">
+        <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+          <span class="sub-kicker">Total Revenue (This Month)</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" /></svg>
+          </span>
+          <h2 class="sub-value">$48,290</h2>
+          <div class="sub-change">+ 15.3%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+
+        <article class="sub-card" style="--accent:#19d67b; --glow:rgba(25, 214, 123, 0.66);">
+          <span class="sub-kicker">Active Subscriptions</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h10" /><path d="M7 13h6" /></svg>
+          </span>
+          <h2 class="sub-value">2,156</h2>
+          <div class="sub-change">+ 12.6%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+
+        <article class="sub-card" style="--accent:#f5a11d; --glow:rgba(245, 161, 29, 0.6);">
+          <span class="sub-kicker">Trial Subscriptions 7d</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          </span>
+          <h2 class="sub-value">156</h2>
+          <div class="sub-change">+ 8.1%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+
+        <article class="sub-card" style="--accent:#ff354d; --glow:rgba(255, 53, 77, 0.62);">
+          <span class="sub-kicker">Expiring Soon (7 Days)</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 10 18H2L12 3Z" /><path d="M12 9v5" /><path d="M12 17h.01" /></svg>
+          </span>
+          <h2 class="sub-value">28</h2>
+          <div class="sub-change down">- 16.7%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+
+        <article class="sub-card" style="--accent:#8ba0bd; --glow:rgba(139, 160, 189, 0.5);">
+          <span class="sub-kicker">Canceled (This Month)</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </span>
+          <h2 class="sub-value">42</h2>
+          <div class="sub-change">+ 5.2%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+
+        <article class="sub-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.72);">
+          <span class="sub-kicker">MRR (Monthly Recurring)</span>
+          <span class="sub-card-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 19V5" /><path d="M3 19h18" /><path d="m7 15 4-4 3 3 5-7" /></svg>
+          </span>
+          <h2 class="sub-value">$86,540</h2>
+          <div class="sub-change">+ 18.9%</div>
+          <p class="sub-muted">vs last month</p>
+        </article>
+      </section>
+
+      <section class="analytics-grid" aria-label="Subscription analytics">
+        <article class="sub-panel">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Revenue Overview</h2>
+              <h3 class="sub-value">$48,290 <span class="sub-change">+ 15.3%</span></h3>
+              <p class="sub-muted">vs last month</p>
+            </div>
+            <select class="mini-select" aria-label="Revenue range">
+              <option>This Month</option>
+              <option>Last Month</option>
+            </select>
+          </div>
+          <div class="revenue-chart">
+            <div class="chart-axis" aria-hidden="true"><span>$80K</span><span>$60K</span><span>$40K</span><span>$20K</span><span>$0</span></div>
+            <div class="chart-frame">
+              <svg viewBox="0 0 540 210" preserveAspectRatio="none" aria-label="Revenue line chart">
+                <defs>
+                  <linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#7c3cff" stop-opacity="0.58" />
+                    <stop offset="100%" stop-color="#7c3cff" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(112, 133, 168, 0.18)" stroke-width="1">
+                  <path d="M0 36H540" /><path d="M0 78H540" /><path d="M0 120H540" /><path d="M0 162H540" /><path d="M0 204H540" />
+                </g>
+                <path d="M0 184 L32 174 L64 154 L96 141 L128 127 L160 133 L192 98 L224 116 L256 126 L288 122 L320 119 L352 118 L384 122 L416 92 L448 82 L480 84 L512 78 L540 58 L540 210 L0 210 Z" fill="url(#revenueFill)" />
+                <path d="M0 184 L32 174 L64 154 L96 141 L128 127 L160 133 L192 98 L224 116 L256 126 L288 122 L320 119 L352 118 L384 122 L416 92 L448 82 L480 84 L512 78 L540 58" fill="none" stroke="#8d4cff" stroke-width="3" />
+                <g fill="#a875ff">
+                  <circle cx="192" cy="98" r="4" /><circle cx="288" cy="122" r="4" /><circle cx="448" cy="82" r="4" /><circle cx="540" cy="58" r="4" />
+                </g>
+              </svg>
+              <div class="chart-tip"><strong>May 15</strong><br />$42,610</div>
+            </div>
+            <div class="chart-months" aria-hidden="true"><span>May 1</span><span>May 6</span><span>May 11</span><span>May 16</span><span>May 21</span><span>May 26</span><span>May 31</span></div>
+          </div>
+        </article>
+
+        <article class="sub-panel">
+          <h2 class="panel-title">Subscriptions by Plan</h2>
+          <div class="plan-chart">
+            <div class="donut" role="img" aria-label="Plan split donut chart">
+              <div class="donut-inner"><span><strong class="donut-number">2,156</strong><span class="donut-label">Total</span></span></div>
+            </div>
+            <div class="legend-list">
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#8d4cff;"></span> Free</span><span class="legend-count">45.2% (974)</span></div>
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#3f8cff;"></span> Pro</span><span class="legend-count">25.8% (556)</span></div>
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#19d67b;"></span> Business</span><span class="legend-count">18.7% (403)</span></div>
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#ffad35;"></span> Enterprise</span><span class="legend-count">10.3% (223)</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="sub-panel">
+          <h2 class="panel-title">Billing Cycle</h2>
+          <div class="billing-chart">
+            <div class="donut billing" role="img" aria-label="Billing cycle donut chart">
+              <div class="donut-inner"><span><strong class="donut-number">68.4%</strong><span class="donut-label">Monthly</span></span></div>
+            </div>
+            <div class="legend-list">
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#8d4cff;"></span> Monthly</span><span class="legend-count">68.4% (1,474)</span></div>
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#a875ff;"></span> Yearly</span><span class="legend-count">28.7% (619)</span></div>
+              <div class="legend-row"><span class="legend-label"><span class="legend-dot" style="--dot:#19d67b;"></span> Other</span><span class="legend-count">2.9% (63)</span></div>
+            </div>
+          </div>
+          <div class="billing-footer"><span>Avg. Revenue Per User</span><span><strong>$40.14</strong> <span class="sub-change">+ 11.2%</span></span></div>
+        </article>
+      </section>
+
+      <section class="content-grid" aria-label="Subscriptions table and summaries">
+        <article class="sub-panel table-panel">
+          <div class="sub-tabs" role="tablist" aria-label="Subscription status tabs">
+            <button class="sub-tab active" type="button" data-tab="all">All Subscriptions</button>
+            <button class="sub-tab" type="button" data-tab="active">Active</button>
+            <button class="sub-tab" type="button" data-tab="trial">Trial</button>
+            <button class="sub-tab" type="button" data-tab="past-due">Past Due</button>
+            <button class="sub-tab" type="button" data-tab="cancelled">Canceled</button>
+            <button class="sub-tab" type="button" data-tab="expired">Expired</button>
+          </div>
+
+          <div class="sub-tools">
+            <label class="sub-search" aria-label="Search subscriptions">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              <input type="search" placeholder="Search by organization name, domain or email..." />
+            </label>
+            <select class="sub-select" aria-label="Filter by plan"><option>All Plans</option><option>Pro</option><option>Business</option><option>Enterprise</option></select>
+            <select class="sub-select" aria-label="Filter by status"><option>All Status</option><option>Active</option><option>Trial</option><option>Past Due</option></select>
+            <select class="sub-select" aria-label="Filter by billing cycle"><option>All Billing Cycles</option><option>Monthly</option><option>Yearly</option></select>
+            <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg> Filters</button>
+            <button class="filter-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg> Export</button>
+          </div>
+
+          <div class="sub-table-wrap">
+            <table class="sub-table">
+              <thead>
+                <tr><th>Organization</th><th>Plan</th><th>Status</th><th>Users</th><th>Billing Cycle</th><th>Next Billing Date</th><th>Amount</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff7a59;">A</span><div><div class="org-name">Acme Corporation</div><div class="org-domain">acme.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td>12 / 20</td><td>Monthly</td><td>Jun 15, 2025</td><td>$99.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#b7c9e8;">GI</span><div><div class="org-name">Globex Industries</div><div class="org-domain">globex.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td>28 / 50</td><td>Yearly</td><td>Aug 12, 2025</td><td>$1,199.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#5b6478;">I</span><div><div class="org-name">Initech</div><div class="org-domain">initech.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td><span class="status-pill" style="--status:#f5a11d;">Trial</span></td><td>5 / 20</td><td>Monthly</td><td>Jun 02, 2025</td><td>$99.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#eef2f8;color:#152033;">S</span><div><div class="org-name">Stark Industries</div><div class="org-domain">starkindustries.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td>85 / 100</td><td>Yearly</td><td>Dec 25, 2025</td><td>$4,999.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#314970;">W</span><div><div class="org-name">Wayne Enterprises</div><div class="org-domain">wayne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td><span class="status-pill" style="--status:#ff354d;">Past Due</span></td><td>18 / 50</td><td>Monthly</td><td>May 01, 2025<br /><span class="sub-change down">(14 days overdue)</span></td><td>$299.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#6a6f7c;">C</span><div><div class="org-name">Cyberdyne Systems</div><div class="org-domain">cyberdyne.com</div></div></div></td><td><span class="plan-pill" style="--pill:#8d6aff;">Pro</span></td><td><span class="status-pill" style="--status:#8ba0bd;">Canceled</span></td><td>0 / 20</td><td>Monthly</td><td>Apr 20, 2025</td><td>$0.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#f1f4f8;color:#172033;">O</span><div><div class="org-name">Oscorp Technologies</div><div class="org-domain">oscorp.com</div></div></div></td><td><span class="plan-pill" style="--pill:#ffad35;">Enterprise</span></td><td><span class="status-pill" style="--status:#19d67b;">Active</span></td><td>60 / 100</td><td>Yearly</td><td>Oct 10, 2025</td><td>$4,999.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+                <tr><td><div class="org-cell"><span class="org-avatar" style="--avatar:#ff405f;">U</span><div><div class="org-name">Umbrella Corporation</div><div class="org-domain">umbrella.com</div></div></div></td><td><span class="plan-pill" style="--pill:#3f8cff;">Business</span></td><td><span class="status-pill" style="--status:#8ba0bd;">Expired</span></td><td>0 / 50</td><td>Monthly</td><td>Apr 10, 2025</td><td>$0.00</td><td><button class="table-action" type="button">View</button> <button class="table-action table-more" type="button">...</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span>Showing 1 to 8 of 2,156 subscriptions</span>
+            <div class="pager">
+              <button class="page-btn" type="button">&lt;</button>
+              <button class="page-btn active" type="button">1</button>
+              <button class="page-btn" type="button">2</button>
+              <button class="page-btn" type="button">3</button>
+              <span>...</span>
+              <button class="page-btn" type="button">270</button>
+              <button class="page-btn" type="button">&gt;</button>
+              <select class="page-select" aria-label="Rows per page"><option>10 / page</option><option>25 / page</option></select>
+            </div>
+          </div>
+        </article>
+
+        <aside class="side-stack" aria-label="Subscription summaries">
+          <article class="sub-panel">
+            <h2 class="panel-title">Plan Distribution</h2>
+            <div class="distribution-list">
+              <div class="distribution-row"><span class="distribution-name">Free</span><div class="bar-track"><div class="bar-fill" style="--size:45.2%; --bar:#8d4cff;"></div></div><span class="distribution-value">974&nbsp;&nbsp;45.2%</span></div>
+              <div class="distribution-row"><span class="distribution-name">Pro</span><div class="bar-track"><div class="bar-fill" style="--size:25.8%; --bar:#3f8cff;"></div></div><span class="distribution-value">556&nbsp;&nbsp;25.8%</span></div>
+              <div class="distribution-row"><span class="distribution-name">Business</span><div class="bar-track"><div class="bar-fill" style="--size:18.7%; --bar:#19d67b;"></div></div><span class="distribution-value">403&nbsp;&nbsp;18.7%</span></div>
+              <div class="distribution-row"><span class="distribution-name">Enterprise</span><div class="bar-track"><div class="bar-fill" style="--size:10.3%; --bar:#ffad35;"></div></div><span class="distribution-value">223&nbsp;&nbsp;10.3%</span></div>
+            </div>
+            <div class="distribution-total"><span>Total</span><strong>2,156</strong></div>
+          </article>
+
+          <article class="sub-panel">
+            <div class="panel-head"><h2 class="panel-title">Recent Activity</h2></div>
+            <div class="activity-list">
+              <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#10bf67;">+</span><div><div class="activity-title">New subscription</div><div class="activity-text">Acme Corporation</div></div></div><span class="activity-time">2 min ago</span></div>
+              <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#10bf67;">$</span><div><div class="activity-title">Payment succeeded</div><div class="activity-text">Globex Industries</div></div></div><span class="activity-time">15 min ago</span></div>
+              <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#ff354d;">!</span><div><div class="activity-title">Subscription canceled</div><div class="activity-text">Initech</div></div></div><span class="activity-time">1 hr ago</span></div>
+              <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#8d6aff;">^</span><div><div class="activity-title">Plan upgraded</div><div class="activity-text">Stark Industries</div></div></div><span class="activity-time">2 hr ago</span></div>
+              <div class="activity-row"><div class="activity-left"><span class="activity-icon" style="--activity:#f5a11d;">?</span><div><div class="activity-title">Payment failed</div><div class="activity-text">Wayne Enterprises</div></div></div><span class="activity-time">3 hr ago</span></div>
+            </div>
+            <a class="panel-link" href="#">View All Activity &gt;</a>
+          </article>
+        </aside>
+      </section>
+    </main>
+
+
+    
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const subTabs = document.querySelectorAll(".sub-tab[data-tab]");
+        const subViews = document.querySelectorAll(".subscription-view[data-sub-view]");
+        const subscriptionsDashboard = document.querySelector(".subscriptions-dashboard");
+        const pageTitle = document.querySelector(".welcome-title");
+        const pageCopy = document.querySelector(".welcome-copy");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+        const subscriptionViewNames = new Set(["all", "active", "trial", "past-due", "cancelled", "expired"]);
+        let viewSwitchTimer;
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+
+        function setSubscriptionView(viewName) {
+            if (!subscriptionViewNames.has(viewName)) {
+                return;
+            }
+
+            if (subscriptionsDashboard) {
+                window.clearTimeout(viewSwitchTimer);
+                subscriptionsDashboard.classList.remove("view-switching");
+                void subscriptionsDashboard.offsetWidth;
+                subscriptionsDashboard.classList.toggle("all-view", viewName === "all");
+                subscriptionsDashboard.dataset.currentView = viewName;
+            }
+
+            subViews.forEach((view) => {
+                view.classList.toggle("active", viewName !== "all" && view.dataset.subView === viewName);
+            });
+
+            subTabs.forEach((tab) => {
+                const isActive = tab.dataset.tab === viewName;
+                tab.classList.toggle("active", isActive);
+                tab.setAttribute("aria-selected", String(isActive));
+            });
+
+            if (subscriptionsDashboard) {
+                subscriptionsDashboard.classList.add("view-switching");
+                viewSwitchTimer = window.setTimeout(() => {
+                    subscriptionsDashboard.classList.remove("view-switching");
+                }, 220);
+            }
+
+            if (pageTitle && pageCopy) {
+                if (viewName === "all") {
+                    pageTitle.textContent = "Subscriptions";
+                    pageCopy.textContent = "Manage all subscriptions, billing status, plans, and activity.";
+                } else if (viewName === "trial") {
+                    pageTitle.textContent = "Trial Subscriptions";
+                    pageCopy.textContent = "Monitor trial usage, expirations, and conversion activity.";
+                } else if (viewName === "past-due") {
+                    pageTitle.textContent = "Past Due Subscriptions";
+                    pageCopy.textContent = "Track and manage all past due subscriptions and payment recovery.";
+                } else if (viewName === "cancelled") {
+                    pageTitle.textContent = "Cancelled Subscriptions";
+                    pageCopy.textContent = "View and analyze cancelled subscriptions and cancellation trends.";
+                } else if (viewName === "expired") {
+                    pageTitle.textContent = "Expired Subscriptions";
+                    pageCopy.textContent = "View and analyze expired subscriptions and renewal opportunities.";
+                } else if (viewName === "active") {
+                    pageTitle.textContent = "Active Subscriptions";
+                    pageCopy.textContent = "Manage and monitor all active subscription billing details.";
+                }
+            }
+        }
+
+        if (subscriptionsDashboard) {
+            subscriptionsDashboard.addEventListener("click", (event) => {
+                const tab = event.target.closest(".sub-tab[data-tab]");
+
+                if (!tab || !subscriptionsDashboard.contains(tab)) {
+                    return;
+                }
+
+                setSubscriptionView(tab.dataset.tab);
+            });
+        }
+
+        setSubscriptionView("all");
+    </script>
+</body>
+
+</html>

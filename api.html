@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar API Access</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+
+    .api-dashboard {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 92px 24px 28px;
+      background:
+        radial-gradient(circle at 26% 15%, rgba(111, 77, 255, 0.13), transparent 24rem),
+        linear-gradient(135deg, rgba(2, 8, 18, 0.08), rgba(5, 14, 28, 0.46));
+    }
+
+    .api-metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .api-card,
+    .api-panel,
+    .api-guide-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(8, 21, 40, 0.98), rgba(4, 13, 26, 0.98));
+      border: 1px solid rgba(91, 111, 150, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 38px rgba(0, 0, 0, 0.18);
+    }
+
+    .api-card {
+      min-height: 104px;
+      padding: 15px 15px 13px;
+    }
+
+    .api-card::after,
+    .api-guide-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -22px -36px auto;
+      width: 84px;
+      height: 84px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--glow), transparent 68%);
+      opacity: 0.34;
+      pointer-events: none;
+    }
+
+    .api-kicker,
+    .api-muted,
+    .api-table th,
+    .api-small-copy,
+    .activity-copy {
+      color: #8e9ab1;
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 400;
+    }
+
+    .api-card-icon {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+    }
+
+    .api-value {
+      margin: 9px 0 6px;
+      color: white;
+      font-size: 23px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .api-change {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .api-change.down {
+      color: #ff425c;
+    }
+
+    .api-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .api-main-stack,
+    .api-side-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .api-side-stack {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .api-panel {
+      min-width: 0;
+      height: 100%;
+      padding: 14px;
+    }
+
+    .api-panel-header,
+    .api-toolbar,
+    .api-activity-item,
+    .api-guide-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .api-panel-title {
+      margin: 0;
+      color: white;
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .api-tabs {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 13px;
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+    }
+
+    .api-tab {
+      position: relative;
+      padding: 0 0 10px;
+      color: #9aa7bf;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .api-tab.active {
+      color: #f2f5ff;
+    }
+
+    .api-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 99px;
+      background: #7b4dff;
+      box-shadow: 0 0 12px rgba(123, 77, 255, 0.78);
+    }
+
+    .api-toolbar {
+      margin-bottom: 12px;
+    }
+
+    .api-search {
+      min-width: 240px;
+      height: 36px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 12px;
+      color: #8ea0bd;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.15);
+      border-radius: 7px;
+    }
+
+    .api-search input {
+      width: 100%;
+      min-width: 0;
+      color: #dbe4f4;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 10px;
+    }
+
+    .api-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .api-select,
+    .api-mini-btn {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 10px;
+      color: #dbe3f2;
+      background: #061020;
+      border: 1px solid rgba(113, 132, 166, 0.17);
+      border-radius: 7px;
+      font: inherit;
+      font-size: 10px;
+    }
+
+    .api-mini-btn {
+      cursor: pointer;
+    }
+
+    .api-table-wrap {
+      width: 100%;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .api-table-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .api-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .api-table th:nth-child(1),
+    .api-table td:nth-child(1) { width: 24%; }
+
+    .api-table th:nth-child(2),
+    .api-table td:nth-child(2) { width: 16%; }
+
+    .api-table th:nth-child(3),
+    .api-table td:nth-child(3) { width: 12%; }
+
+    .api-table th:nth-child(4),
+    .api-table td:nth-child(4) { width: 10%; }
+
+    .api-table th:nth-child(5),
+    .api-table td:nth-child(5) { width: 13%; }
+
+    .api-table th:nth-child(6),
+    .api-table td:nth-child(6) { width: 12%; }
+
+    .api-table th:nth-child(7),
+    .api-table td:nth-child(7) { width: 9%; }
+
+    .api-table th:nth-child(8),
+    .api-table td:nth-child(8) { width: 4%; }
+
+    .api-table th,
+    .api-table td {
+      padding: 12px 8px;
+      border-bottom: 1px solid rgba(104, 125, 163, 0.1);
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .api-table td {
+      color: #dce4f1;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .key-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .key-dot {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 18px;
+      color: white;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--dot) 17%, #071225);
+      border: 1px solid color-mix(in srgb, var(--dot) 40%, transparent);
+    }
+
+    .key-title {
+      color: white;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .key-code,
+    .key-sub {
+      display: block;
+      color: #7f8ba2;
+      font-size: 9px;
+      margin-top: 1px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .api-pill,
+    .api-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 18px;
+      padding: 0 7px;
+      border-radius: 5px;
+      color: var(--pill);
+      background: color-mix(in srgb, var(--pill) 13%, transparent);
+      border: 1px solid color-mix(in srgb, var(--pill) 20%, transparent);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .api-tag {
+      --pill: #8d6aff;
+    }
+
+    .api-action {
+      width: 28px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      color: #b6c1d6;
+      background: #061020;
+      border: 1px solid rgba(113, 132, 166, 0.14);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .api-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      color: #8e9ab1;
+      font-size: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .page-btn {
+      min-width: 27px;
+      height: 27px;
+      display: inline-grid;
+      place-items: center;
+      color: #b9c3d6;
+      background: #061020;
+      border: 1px solid rgba(113, 132, 166, 0.12);
+      border-radius: 6px;
+      font: inherit;
+      font-size: 10px;
+    }
+
+    .page-btn.active {
+      color: white;
+      background: linear-gradient(180deg, #7b4dff, #522bd6);
+      border-color: rgba(151, 116, 255, 0.45);
+    }
+
+    .api-chart {
+      height: 184px;
+      margin-top: 4px;
+      display: grid;
+      align-items: stretch;
+    }
+
+    .api-chart svg {
+      width: 100%;
+      height: 80%;
+      overflow: visible;
+    }
+
+    .api-total {
+      margin: 7px 0 0;
+      color: white;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .usage-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .donut {
+      width: 110px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: conic-gradient(#7b4dff 0 41%, #3f8cff 41% 66%, #17d27c 66% 79%, #f5a11d 79% 100%);
+    }
+
+    .donut-inner {
+      width: 72px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 999px;
+      background: #071225;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .donut-inner strong {
+      color: white;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .donut-inner span {
+      color: #91a0b8;
+      font-size: 9px;
+    }
+
+    .legend-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .legend-item {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+      color: #dce4f1;
+      font-size: 10px;
+    }
+
+    .legend-item span:nth-child(2) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .legend-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--dot);
+    }
+
+    .legend-percent,
+    .legend-value {
+      color: #9aa7bf;
+    }
+
+    .api-activity-list {
+      display: grid;
+      gap: 13px;
+      margin-top: 16px;
+    }
+
+    .activity-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .activity-icon {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 22px;
+      color: white;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+
+    .activity-title {
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .activity-copy {
+      margin: 1px 0 0;
+      font-size: 9px;
+    }
+
+    .activity-time {
+      color: #8e9ab1;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .api-guides {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .api-guide-card {
+      min-height: 128px;
+      padding: 16px;
+    }
+
+    .guide-title {
+      margin: 0 0 7px;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .guide-copy {
+      min-height: 36px;
+      margin: 0 0 12px;
+      color: #9ba7bd;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .guide-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 25px;
+      padding: 0 9px;
+      color: var(--accent);
+      text-decoration: none;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .guide-art {
+      position: absolute;
+      right: 15px;
+      bottom: 10px;
+      width: 74px;
+      height: 58px;
+      opacity: 0.76;
+      color: var(--accent);
+      filter: drop-shadow(0 18px 16px color-mix(in srgb, var(--accent) 28%, transparent));
+    }
+
+    .view-link {
+      color: #8d6aff;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1380px) {
+      .api-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .api-guides {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 920px) {
+      .topbar,
+      .sidebar {
+        position: static;
+      }
+
+      .topbar {
+        left: 0;
+      }
+
+      .sidebar {
+        width: 100%;
+        min-height: auto;
+      }
+
+      .api-dashboard {
+        margin-left: 0;
+        padding-top: 20px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .api-dashboard {
+        padding: 18px 12px 210px;
+      }
+
+      .api-metrics,
+      .api-side-stack,
+      .api-guides,
+      .api-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .api-metrics {
+        display: grid;
+      }
+
+      .api-toolbar,
+      .api-filter-row,
+      .api-panel-header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .api-search {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .api-select,
+      .api-mini-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .usage-row {
+        grid-template-columns: 1fr;
+      }
+
+      .donut {
+        margin: 0 auto;
+      }
+
+      .api-table,
+      .api-table thead,
+      .api-table tbody,
+      .api-table tr,
+      .api-table th,
+      .api-table td {
+        display: block;
+        min-width: 0;
+      }
+
+      .api-table thead {
+        display: none;
+      }
+
+      .api-table tr {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(104, 125, 163, 0.1);
+      }
+
+      .api-table td {
+        display: grid;
+        grid-template-columns: 105px minmax(0, 1fr);
+        gap: 10px;
+        width: auto !important;
+        padding: 7px 0;
+        border-bottom: 0;
+        white-space: normal;
+        overflow: visible;
+      }
+
+      .api-table td::before {
+        color: #8e9ab1;
+        font-size: 10px;
+      }
+
+      .api-table td:nth-child(1)::before { content: "Key Name"; }
+      .api-table td:nth-child(2)::before { content: "Client"; }
+      .api-table td:nth-child(3)::before { content: "Environment"; }
+      .api-table td:nth-child(4)::before { content: "Status"; }
+      .api-table td:nth-child(5)::before { content: "Requests"; }
+      .api-table td:nth-child(6)::before { content: "Rate Limit"; }
+      .api-table td:nth-child(7)::before { content: "Last Used"; }
+      .api-table td:nth-child(8)::before { content: "Actions"; }
+    }
+
+    @media (max-width: 980px) {
+      .api-side-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        position: fixed;
+        left: 0;
+        top: auto;
+        bottom: 0;
+      }
+
+      .api-dashboard {
+        padding-bottom: 220px;
+      }
+    }
+    /* Shared plain typography */
+    body,
+    body * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    body :is(div, p, span, a, button, input, select, textarea, label, li, td, th, small, strong, b) {
+      font-size: max(11px, 1em) !important;
+    }
+
+    body :is(h1, h2, h3, h4, h5, h6) {
+      font-size: max(14px, 1em) !important;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html" data-page="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"  data-page="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="osint-dashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="user-management.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="varification-request.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="osint-intelligence.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="darkweb-M.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="Report-R.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="api-dashboard" aria-label="API access dashboard">
+      <section class="api-metrics" aria-label="API access metrics">
+        <article class="api-card" style="--accent:#3f8cff; --glow:rgba(63, 140, 255, 0.75);">
+          <span class="api-kicker">Total API Keys</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 7 2 2 4-4" /><path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" /><path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" /></svg></span>
+          <h2 class="api-value">24</h2>
+          <div class="api-change">+ 20.0%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+
+        <article class="api-card" style="--accent:#19d873; --glow:rgba(25, 216, 115, 0.72);">
+          <span class="api-kicker">Active API Keys</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><path d="m8.5 12.5 2.3 2.3 4.7-5.3" /></svg></span>
+          <h2 class="api-value">18</h2>
+          <div class="api-change">+ 12.5%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+
+        <article class="api-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.74);">
+          <span class="api-kicker">Requests (This Month)</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h4l3-8 4 16 3-8h4" /></svg></span>
+          <h2 class="api-value">1.2M</h2>
+          <div class="api-change">+ 28.4%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+
+        <article class="api-card" style="--accent:#f57a1d; --glow:rgba(245, 122, 29, 0.66);">
+          <span class="api-kicker">Rate Limit Hits</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="M12 8v5" /><path d="M12 17h.01" /></svg></span>
+          <h2 class="api-value">3,456</h2>
+          <div class="api-change down">+ 8.4%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+
+        <article class="api-card" style="--accent:#ff354d; --glow:rgba(255, 53, 77, 0.66);">
+          <span class="api-kicker">Errors (This Month)</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg></span>
+          <h2 class="api-value">642</h2>
+          <div class="api-change down">+ 15.6%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+
+        <article class="api-card" style="--accent:#1e7cff; --glow:rgba(30, 124, 255, 0.72);">
+          <span class="api-kicker">Avg. Response Time</span>
+          <span class="api-card-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
+          <h2 class="api-value">120 ms</h2>
+          <div class="api-change">+ 6.3%</div>
+          <div class="api-muted">vs last 30 days</div>
+        </article>
+      </section>
+
+      <section class="api-layout">
+        <div class="api-main-stack">
+          <article class="api-panel">
+            <div class="api-tabs" role="tablist" aria-label="API settings tabs">
+              <button class="api-tab active" type="button">API Keys</button>
+              <button class="api-tab" type="button">Applications</button>
+              <button class="api-tab" type="button">IP Allowlist</button>
+              <button class="api-tab" type="button">Webhooks</button>
+              <button class="api-tab" type="button">Documentation</button>
+            </div>
+
+            <div class="api-toolbar">
+              <label class="api-search" aria-label="Search API keys">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                <input type="search" placeholder="Search by key name, client name or environment..." />
+              </label>
+              <div class="api-filter-row">
+                <button class="api-select" type="button">All Status <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="m6 9 6 6 6-6" /></svg></button>
+                <button class="api-select" type="button">All Environments <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="m6 9 6 6 6-6" /></svg></button>
+                <button class="api-mini-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg> Filters</button>
+                <button class="api-mini-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg> Export</button>
+              </div>
+            </div>
+
+            <div class="api-table-wrap">
+              <table class="api-table">
+                <thead>
+                  <tr>
+                    <th>Key Name</th>
+                    <th>Client / Application</th>
+                    <th>Environment</th>
+                    <th>Status</th>
+                    <th>Requests (30d)</th>
+                    <th>Rate Limit</th>
+                    <th>Last Used</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#dce8ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M12 2v20" /><path d="m17 5-5-3-5 3" /></svg></span><div><span class="key-title">Production Key</span> <span class="api-tag">Primary</span><span class="key-code">br_live_************a73f3</span></div></div></td><td>BreachRadar Web App<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>512,945</td><td>10,000 / min</td><td>2 min ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#a9baff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><rect x="5" y="3" width="14" height="18" rx="2" /></svg></span><div><span class="key-title">Mobile App Key</span><span class="key-code">br_live_************b9c1</span></div></div></td><td>BreachRadar Mobile<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>312,430</td><td>5,000 / min</td><td>5 min ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#f4c95d;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M4 21v-7" /><path d="M12 21v-9" /><path d="M20 21v-5" /></svg></span><div><span class="key-title">Analytics Service</span><span class="key-code">br_live_************d34d</span></div></div></td><td>Analytics &amp; Reporting<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>156,782</td><td>2,000 / min</td><td>15 min ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#f1f4f8;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" /></svg></span><div><span class="key-title">Staging Key</span><span class="key-code">br_test_************s5d5</span></div></div></td><td>BreachRadar Web App<span class="key-sub">Staging</span></td><td><span class="api-tag" style="--pill:#3f8cff;">Staging</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>45,231</td><td>2,000 / min</td><td>1 hr ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#ff9d6b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><circle cx="12" cy="12" r="9" /><path d="M12 8v5" /></svg></span><div><span class="key-title">Integration Key</span><span class="key-code">br_live_************x7f8</span></div></div></td><td>Slack Integration<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#ff354d;">Inactive</span></td><td>28,450</td><td>1,000 / min</td><td>2 hr ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#b5c6e8;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M12 20v-6" /><path d="M6 20V10" /><path d="M18 20V4" /></svg></span><div><span class="key-title">PowerBI Dashboard Key</span><span class="key-code">br_live_************fb80</span></div></div></td><td>PowerBI Dashboard<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>0</td><td>500 / min</td><td>7 days ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#dce8ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span><div><span class="key-title">Dev Key</span><span class="key-code">br_dev_************a4b2</span></div></div></td><td>Development Testing<span class="key-sub">Development</span></td><td><span class="api-tag" style="--pill:#19d873;">Development</span></td><td><span class="api-pill" style="--pill:#19d873;">Active</span></td><td>12,340</td><td>1,000 / min</td><td>3 hr ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                  <tr><td><div class="key-name"><span class="key-dot" style="--dot:#f7dc75;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /></svg></span><div><span class="key-title">Legacy System Key</span><span class="key-code">br_live_************dc4a</span></div></div></td><td>Legacy System<span class="key-sub">Production</span></td><td><span class="api-tag">Production</span></td><td><span class="api-pill" style="--pill:#ff354d;">Revoked</span></td><td>0</td><td>500 / min</td><td>30 days ago</td><td><button class="api-action" type="button">...</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="api-pagination">
+              <span>Showing 1 to 8 of 24 API keys</span>
+              <div class="pager" aria-label="Pagination">
+                <button class="page-btn" type="button">&lt;</button>
+                <button class="page-btn active" type="button">1</button>
+                <button class="page-btn" type="button">2</button>
+                <button class="page-btn" type="button">3</button>
+                <button class="page-btn" type="button">&gt;</button>
+                <button class="api-select" type="button">10 / page <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="m6 9 6 6 6-6" /></svg></button>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <aside class="api-side-stack" aria-label="API usage and activity">
+          <article class="api-panel">
+            <div class="api-panel-header">
+              <h2 class="api-panel-title">API Usage Overview</h2>
+              <button class="api-select" type="button">This Month <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;"><path d="m6 9 6 6 6-6" /></svg></button>
+            </div>
+            <div class="api-muted" style="margin-top:13px;">Total Requests</div>
+            <div class="api-total">1,248,945</div>
+            <div class="api-change" style="margin-top:7px;">+ 28.4% <span class="api-muted">vs last month</span></div>
+            <div class="api-chart" aria-hidden="true">
+              <svg viewBox="0 0 380 190" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="apiLineFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#7b4dff" stop-opacity=".44"/>
+                    <stop offset="100%" stop-color="#7b4dff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0 165H380" stroke="rgba(122,139,174,.12)"/><path d="M0 125H380" stroke="rgba(122,139,174,.12)"/><path d="M0 85H380" stroke="rgba(122,139,174,.12)"/><path d="M0 45H380" stroke="rgba(122,139,174,.12)"/>
+                <path d="M0 162 C30 151 43 139 67 128 C92 116 109 103 134 91 C158 80 177 77 199 68 C225 57 237 49 258 66 C283 85 296 85 318 82 C337 80 348 57 380 52 L380 190 L0 190Z" fill="url(#apiLineFill)"/>
+                <path d="M0 162 C30 151 43 139 67 128 C92 116 109 103 134 91 C158 80 177 77 199 68 C225 57 237 49 258 66 C283 85 296 85 318 82 C337 80 348 57 380 52" fill="none" stroke="#7b4dff" stroke-width="3"/>
+                <path d="M0 162 C40 149 77 121 115 103 C151 86 186 72 224 62 C259 54 296 78 330 73 C353 70 364 56 380 52" fill="none" stroke="#a16fff" stroke-width="1.5" opacity=".65"/>
+                <text x="0" y="184" fill="#7f8ba2" font-size="10">May 1</text><text x="102" y="184" fill="#7f8ba2" font-size="10">May 8</text><text x="205" y="184" fill="#7f8ba2" font-size="10">May 15</text><text x="302" y="184" fill="#7f8ba2" font-size="10">May 22</text><text x="350" y="184" fill="#7f8ba2" font-size="10">May 29</text>
+              </svg>
+            </div>
+            <div class="usage-row">
+              <div class="donut"><div class="donut-inner"><div><strong>1.2M</strong><br><span>Total</span></div></div></div>
+              <div class="legend-list">
+                <div class="legend-item"><span class="legend-swatch" style="--dot:#7b4dff;"></span><span>BreachRadar Web App</span><span class="legend-percent">41%</span><span class="legend-value">512K</span></div>
+                <div class="legend-item"><span class="legend-swatch" style="--dot:#3f8cff;"></span><span>BreachRadar Mobile</span><span class="legend-percent">25.0%</span><span class="legend-value">312K</span></div>
+                <div class="legend-item"><span class="legend-swatch" style="--dot:#17d27c;"></span><span>Analytics &amp; Reporting</span><span class="legend-percent">12.5%</span><span class="legend-value">156K</span></div>
+                <div class="legend-item"><span class="legend-swatch" style="--dot:#f5a11d;"></span><span>Other Applications</span><span class="legend-percent">21.4%</span><span class="legend-value">268K</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="api-panel">
+            <div class="api-panel-header">
+              <h2 class="api-panel-title">Recent API Activity</h2>
+              <a class="view-link" href="#">View All</a>
+            </div>
+            <div class="api-activity-list">
+              <div class="api-activity-item"><div class="activity-left"><span class="activity-icon" style="--accent:#19d873;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="M12 5v14" /><path d="M5 12h14" /></svg></span><div><div class="activity-title">API key generated</div><p class="activity-copy">Production Key</p></div></div><span class="activity-time">2 min ago</span></div>
+              <div class="api-activity-item"><div class="activity-left"><span class="activity-icon" style="--accent:#f5a11d;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="M12 9v4" /><path d="M12 17h.01" /></svg></span><div><div class="activity-title">Rate limit threshold reached</div><p class="activity-copy">Mobile App Key</p></div></div><span class="activity-time">15 min ago</span></div>
+              <div class="api-activity-item"><div class="activity-left"><span class="activity-icon" style="--accent:#ff354d;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></span><div><div class="activity-title">API key revoked</div><p class="activity-copy">Legacy System Key</p></div></div><span class="activity-time">1 hr ago</span></div>
+              <div class="api-activity-item"><div class="activity-left"><span class="activity-icon" style="--accent:#19d873;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="M12 5v14" /><path d="M5 12h14" /></svg></span><div><div class="activity-title">New IP added to allowlist</div><p class="activity-copy">Production Key</p></div></div><span class="activity-time">2 hr ago</span></div>
+              <div class="api-activity-item"><div class="activity-left"><span class="activity-icon" style="--accent:#3f8cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="M12 20v-6" /><path d="M6 20V10" /><path d="M18 20V4" /></svg></span><div><div class="activity-title">API key updated</div><p class="activity-copy">Analytics Service</p></div></div><span class="activity-time">3 hr ago</span></div>
+            </div>
+          </article>
+        </aside>
+      </section>
+
+      <article class="api-panel api-getting-started">
+        <h2 class="api-panel-title">Getting Started</h2>
+        <p class="api-small-copy">Everything you need to start using the BreachRadar API.</p>
+        <div class="api-guides">
+          <article class="api-guide-card" style="--accent:#8d6aff; --glow:rgba(141, 106, 255, 0.66);"><h3 class="guide-title">API Documentation</h3><p class="guide-copy">Explore our comprehensive API docs with examples and integration guides.</p><a class="guide-link" href="#">View Documentation <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:10px;height:10px;"><path d="M7 7h10v10" /><path d="M7 17 17 7" /></svg></a><svg class="guide-art" viewBox="0 0 90 70" fill="none" stroke="currentColor"><path d="M44 8 70 22 44 36 18 22 44 8Z" fill="currentColor" opacity=".16"/><path d="M44 36v25M18 22v25l26 14 26-14V22"/><path d="M28 27v20M38 32v20M50 31v20M60 26v20"/></svg></article>
+          <article class="api-guide-card" style="--accent:#20dd76; --glow:rgba(32, 221, 118, 0.6);"><h3 class="guide-title">Authentication Guide</h3><p class="guide-copy">Learn how to authenticate your requests and manage API keys securely.</p><a class="guide-link" href="#">View Guide <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:10px;height:10px;"><path d="M7 7h10v10" /><path d="M7 17 17 7" /></svg></a><svg class="guide-art" viewBox="0 0 90 70" fill="none" stroke="currentColor"><path d="M45 8 70 22v25L45 62 20 47V22L45 8Z" fill="currentColor" opacity=".15"/><path d="M45 16v22"/><path d="m33 30 12 8 12-8"/><path d="M35 43a10 10 0 0 1 20 0"/></svg></article>
+          <article class="api-guide-card" style="--accent:#3f8cff; --glow:rgba(63, 140, 255, 0.62);"><h3 class="guide-title">SDKs &amp; Libraries</h3><p class="guide-copy">Use our official SDKs to integrate faster with your favorite languages.</p><a class="guide-link" href="#">View SDKs <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:10px;height:10px;"><path d="M7 7h10v10" /><path d="M7 17 17 7" /></svg></a><svg class="guide-art" viewBox="0 0 90 70" fill="none" stroke="currentColor"><path d="M45 8 70 22v26L45 62 20 48V22L45 8Z" fill="currentColor" opacity=".15"/><path d="m35 28-8 7 8 7"/><path d="m55 28 8 7-8 7"/><path d="m48 24-7 24"/></svg></article>
+          <article class="api-guide-card" style="--accent:#f57a1d; --glow:rgba(245, 122, 29, 0.56);"><h3 class="guide-title">API Status</h3><p class="guide-copy">Check real-time status of our API services and infrastructure.</p><a class="guide-link" href="#">View Status Page <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:10px;height:10px;"><path d="M7 7h10v10" /><path d="M7 17 17 7" /></svg></a><svg class="guide-art" viewBox="0 0 90 70" fill="none" stroke="currentColor"><path d="M45 8 70 22v25L45 62 20 47V22L45 8Z" fill="currentColor" opacity=".15"/><path d="M45 18 58 25v12c0 9-6 16-13 19-7-3-13-10-13-19V25l13-7Z"/><path d="m39 38 4 4 8-10"/></svg></article>
+        </div>
+      </article>
+    </main>
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

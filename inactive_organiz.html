@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .inactive-dashboard {
+      padding: 16px;
+      background:
+        radial-gradient(circle at 86% 8%, rgba(0, 136, 255, 0.08), transparent 24rem),
+        radial-gradient(circle at 12% 0, rgba(111, 77, 255, 0.12), transparent 28rem);
+    }
+
+    .inactive-metrics {
+        margin-top: 70px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .inactive-metrics::-webkit-scrollbar {
+      display: none;
+    }
+
+    .inactive-card,
+    .inactive-panel {
+      background: linear-gradient(180deg, rgba(7, 19, 37, 0.96), rgba(4, 13, 26, 0.98));
+      border: 1px solid rgba(113, 134, 171, 0.14);
+      border-radius: 7px;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+    }
+
+    .inactive-card {
+      min-height: 112px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .inactive-label,
+    .inactive-sub,
+    .inactive-table th,
+    .inactive-select {
+      color: #98a5bb;
+    }
+
+    .inactive-label {
+      margin: 0 0 8px;
+      font-size: 11px;
+    }
+
+    .inactive-value {
+      margin: 0;
+      color: white;
+      font-size: 24px !important;
+      line-height: 1.05;
+    }
+
+    .inactive-change {
+      margin: 9px 0 4px;
+      color: #00d884;
+      font-size: 11px;
+    }
+
+    .inactive-change.down {
+      color: #ff3b4f;
+    }
+
+    .inactive-sub {
+      margin: 0;
+      font-size: 10px;
+    }
+
+    .inactive-icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 19%, transparent);
+    }
+
+    .inactive-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+      margin-top: 14px;
+    }
+
+    .inactive-table-panel {
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .inactive-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      padding: 14px 18px 0;
+      border-bottom: 1px solid rgba(112, 133, 168, 0.14);
+    }
+
+    .inactive-tab {
+      position: relative;
+      padding: 0 0 13px;
+      color: #a6b0c4;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .inactive-tab.active {
+      color: white;
+    }
+
+    .inactive-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
+      background: #8d6aff;
+    }
+
+    .inactive-tools {
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) minmax(105px, 130px) minmax(145px, 170px) minmax(105px, 130px) auto auto;
+      gap: 10px;
+      padding: 14px 18px;
+      align-items: center;
+    }
+
+    .inactive-search,
+    .inactive-select,
+    .inactive-tool,
+    .inactive-page-size,
+    .inactive-range {
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      color: #c7d1e3;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.16);
+      border-radius: 5px;
+    }
+
+    .inactive-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      color: #d9e0ee;
+      background: transparent;
+      font: inherit;
+    }
+
+    .inactive-search input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .inactive-select,
+    .inactive-page-size,
+    .inactive-range {
+      appearance: none;
+      font: inherit;
+    }
+
+    .inactive-tool {
+      justify-content: center;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .inactive-table-wrap {
+      width: 100%;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .inactive-table-wrap::-webkit-scrollbar,
+    .inactive-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .inactive-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .inactive-table th:nth-child(1),
+    .inactive-table td:nth-child(1) { width: 20%; }
+
+    .inactive-table th:nth-child(2),
+    .inactive-table td:nth-child(2) { width: 8%; }
+
+    .inactive-table th:nth-child(3),
+    .inactive-table td:nth-child(3) { width: 7%; }
+
+    .inactive-table th:nth-child(4),
+    .inactive-table td:nth-child(4) { width: 11%; }
+
+    .inactive-table th:nth-child(5),
+    .inactive-table td:nth-child(5) { width: 11%; }
+
+    .inactive-table th:nth-child(6),
+    .inactive-table td:nth-child(6) { width: 16%; }
+
+    .inactive-table th:nth-child(7),
+    .inactive-table td:nth-child(7) { width: 15%; }
+
+    .inactive-table th:nth-child(8),
+    .inactive-table td:nth-child(8) { width: 12%; }
+
+    .inactive-table th,
+    .inactive-table td {
+      padding: 11px 7px;
+      border-top: 1px solid rgba(112, 133, 168, 0.1);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .inactive-table th {
+      font-size: 10px;
+    }
+
+    .inactive-org {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .inactive-logo {
+      width: 25px;
+      height: 25px;
+      flex: 0 0 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--avatar);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 10px;
+    }
+
+    .inactive-name {
+      color: white;
+      font-size: 11px;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .inactive-domain {
+      color: #758198;
+      font-size: 10px;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .inactive-plan,
+    .inactive-reason,
+    .inactive-days {
+      display: inline-flex;
+      justify-content: center;
+      padding: 3px 7px;
+      border-radius: 5px;
+      color: var(--pill);
+      background: color-mix(in srgb, var(--pill) 18%, transparent);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .inactive-days {
+      --pill: #ff354d;
+    }
+
+    .inactive-region {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .inactive-flag {
+      width: 14px;
+      height: 9px;
+      display: inline-block;
+      border-radius: 2px;
+      background: linear-gradient(var(--flag-a), var(--flag-a) 33%, var(--flag-b) 33%, var(--flag-b) 66%, var(--flag-c) 66%);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+    }
+
+    .inactive-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .inactive-view,
+    .inactive-icon-btn {
+      height: 27px;
+      display: inline-grid;
+      place-items: center;
+      color: #c7d1e3;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(122, 139, 174, 0.14);
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .inactive-view {
+      padding: 0 12px;
+    }
+
+    .inactive-icon-btn {
+      width: 27px;
+    }
+
+    .inactive-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(112, 133, 168, 0.1);
+      color: #9ba7bd;
+    }
+
+    .inactive-pager {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .inactive-page {
+      min-width: 30px;
+      height: 30px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 9px;
+      color: #b7c0d4;
+      background: transparent;
+      border: 1px solid rgba(122, 139, 174, 0.14);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .inactive-page.active {
+      color: white;
+      background: linear-gradient(180deg, #8d6aff, #5331dd);
+      border-color: transparent;
+    }
+
+    .inactive-side {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .inactive-side-card {
+      padding: 16px;
+    }
+
+    .inactive-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .inactive-title {
+      margin: 0;
+      color: white;
+      font-size: 13px !important;
+    }
+
+    .inactive-link {
+      color: #8d6aff;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+
+    .inactive-overview {
+      display: grid;
+      grid-template-columns: 126px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .inactive-donut {
+      width: min(118px, 100%);
+      max-width: 118px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      position: relative;
+      background: conic-gradient(#ff9700 0 51.9%, #0088ff 51.9% 77.5%, #ff354d 77.5% 90.5%, #8ba0bd 90.5% 100%);
+    }
+
+    .inactive-donut::before {
+      content: "";
+      position: absolute;
+      inset: 21px;
+      border-radius: 50%;
+      background: #071225;
+    }
+
+    .inactive-donut-text {
+      position: relative;
+      text-align: center;
+      color: white;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .inactive-donut-text strong {
+      display: block;
+      color: white;
+      font-size: 18px !important;
+    }
+
+    .inactive-list,
+    .inactive-quick {
+      display: grid;
+      gap: 11px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .inactive-legend,
+    .inactive-quick li {
+      display: grid;
+      align-items: center;
+      gap: 9px;
+      color: #d8deeb;
+      font-size: 11px;
+    }
+
+    .inactive-legend {
+      grid-template-columns: 10px minmax(0, 1fr) auto;
+    }
+
+    .inactive-legend span:nth-child(3) {
+      color: #9ba7bd;
+      white-space: nowrap;
+    }
+
+    .inactive-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--swatch);
+    }
+
+    .inactive-chart {
+      min-height: 148px;
+    }
+
+    .inactive-chart-meta {
+      margin: 8px 0 0;
+      color: white;
+      font-size: 18px !important;
+    }
+
+    .inactive-chart-meta span {
+      color: #ff3b4f;
+      font-size: 10px !important;
+    }
+
+    .inactive-line-chart {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .reason-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .reason-item {
+      display: grid;
+      grid-template-columns: minmax(95px, 1fr) minmax(80px, 130px) auto;
+      align-items: center;
+      gap: 9px;
+      color: #d8deeb;
+      font-size: 11px;
+    }
+
+    .reason-item span:last-child {
+      color: #9ba7bd;
+      white-space: nowrap;
+    }
+
+    .reason-bar {
+      height: 4px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .reason-fill {
+      width: var(--fill);
+      height: 100%;
+      display: block;
+      border-radius: inherit;
+      background: var(--bar);
+    }
+
+    .inactive-quick li {
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(112, 133, 168, 0.1);
+    }
+
+    .inactive-quick li:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .quick-box {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      color: white;
+      background: color-mix(in srgb, var(--quick) 70%, #071225);
+    }
+
+    .quick-name,
+    .quick-text {
+      display: block;
+      min-width: 0;
+    }
+
+    .quick-name {
+      color: white;
+      font-size: 11px;
+    }
+
+    .quick-text {
+      margin-top: 2px;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 1360px) {
+      .inactive-metrics {
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+      }
+
+      .inactive-side {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 18px;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .inactive-tools {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .inactive-tools .inactive-search {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .inactive-side,
+      .inactive-tools,
+      .inactive-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .inactive-table,
+      .inactive-table thead,
+      .inactive-table tbody,
+      .inactive-table tr,
+      .inactive-table th,
+      .inactive-table td {
+        display: block;
+        min-width: 0;
+      }
+
+      .inactive-table thead {
+        display: none;
+      }
+
+      .inactive-table tr {
+        padding: 12px;
+        border-top: 1px solid rgba(112, 133, 168, 0.12);
+      }
+
+      .inactive-table th,
+      .inactive-table td {
+        width: auto !important;
+        overflow: visible;
+      }
+
+      .inactive-table td {
+        display: grid;
+        grid-template-columns: 116px minmax(0, 1fr);
+        gap: 10px;
+        padding: 8px 0;
+        border: 0;
+      }
+
+      .inactive-table td::before {
+        color: #7f8ba2;
+        font-size: 10px;
+      }
+
+      .inactive-table td:nth-child(1)::before { content: "Organization"; }
+      .inactive-table td:nth-child(2)::before { content: "Plan"; }
+      .inactive-table td:nth-child(3)::before { content: "Users"; }
+      .inactive-table td:nth-child(4)::before { content: "Last Active"; }
+      .inactive-table td:nth-child(5)::before { content: "Inactive Since"; }
+      .inactive-table td:nth-child(6)::before { content: "Reason"; }
+      .inactive-table td:nth-child(7)::before { content: "Region"; }
+      .inactive-table td:nth-child(8)::before { content: "Actions"; }
+
+      .inactive-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: static;
+        min-height: auto;
+        max-width: none;
+        border-right: 0;
+        border-bottom: 1px solid rgba(104, 125, 163, 0.16);
+      }
+
+      .nav {
+        max-height: 58vh;
+      }
+
+      .inactive-dashboard {
+        padding: 14px 12px 190px;
+      }
+
+      .inactive-side {
+        margin-top: 8px;
+      }
+
+      .inactive-tabs {
+        gap: 18px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+      }
+
+      .reason-item {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Shared plain typography */
+    body,
+    body * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    body :is(div, p, span, a, button, input, select, textarea, label, li, td, th, small, strong, b) {
+      font-size: max(11px, 1em) !important;
+    }
+
+    body :is(h1, h2, h3, h4, h5, h6) {
+      font-size: max(14px, 1em) !important;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="osint-dashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="user-management.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="verification-requests.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="osint-intelligence.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="darkweb-M.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="Report-R.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+
+    <main class="content-placeholder inactive-dashboard" aria-label="Inactive organizations dashboard">
+      <section class="inactive-metrics" aria-label="Inactive organization metrics">
+        <article class="inactive-card"><div><p class="inactive-label">Inactive Organizations</p><p class="inactive-value">324</p><p class="inactive-change down">+ 12.3%</p><p class="inactive-sub">vs last 30 days</p></div><span class="inactive-icon" style="--accent:#8ba0bd;" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M18 8h4" /></svg></span></article>
+        <article class="inactive-card"><div><p class="inactive-label">Users Affected</p><p class="inactive-value">1,987</p><p class="inactive-change down">+ 9.8%</p><p class="inactive-sub">vs last 30 days</p></div><span class="inactive-icon" style="--accent:#0088ff;" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6" /><path d="M22 11h-6" /></svg></span></article>
+        <article class="inactive-card"><div><p class="inactive-label">Inactive &gt; 30 Days</p><p class="inactive-value">198</p><p class="inactive-change down">+ 15.2%</p><p class="inactive-sub">vs last 30 days</p></div><span class="inactive-icon" style="--accent:#ff9700;" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span></article>
+        <article class="inactive-card"><div><p class="inactive-label">Inactive &gt; 60 Days</p><p class="inactive-value">82</p><p class="inactive-change down">+ 18.7%</p><p class="inactive-sub">vs last 30 days</p></div><span class="inactive-icon" style="--accent:#ff354d;" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 2v4" /><path d="M16 2v4" /><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 10h18" /><path d="m10 14 4 4" /><path d="m14 14-4 4" /></svg></span></article>
+        <article class="inactive-card"><div><p class="inactive-label">Reactivated (This Month)</p><p class="inactive-value">14</p><p class="inactive-change">+ 16.7%</p><p class="inactive-sub">vs last 30 days</p></div><span class="inactive-icon" style="--accent:#00d884;" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 0 1-9 9 9.7 9.7 0 0 1-6.7-2.7" /><path d="M3 12a9 9 0 0 1 15.2-6.5" /><path d="M18 2v4h-4" /></svg></span></article>
+      </section>
+
+      <section class="inactive-layout" aria-label="Inactive organization details">
+        <article class="inactive-panel inactive-table-panel">
+          <nav class="inactive-tabs" aria-label="Organization status tabs">
+            <a class="inactive-tab" href="organiz.html">All Organizations</a>
+            <a class="inactive-tab" href="active_organiz.html">Active</a>
+            <a class="inactive-tab" href="trail_organiz.html">Trial</a>
+            <a class="inactive-tab" href="suspen_organiz.html">Suspended</a>
+            <a class="inactive-tab active" href="inactive_organiz.html">Inactive</a>
+          </nav>
+
+          <div class="inactive-tools">
+            <label class="inactive-search" aria-label="Search inactive organizations"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg><input type="search" placeholder="Search by organization name, domain, email..." /></label>
+            <select class="inactive-select" aria-label="Plan filter"><option>All Plans</option><option>Pro</option><option>Business</option><option>Enterprise</option></select>
+            <select class="inactive-select" aria-label="Inactive reason filter"><option>All Inactive Reasons</option><option>No Login Activity</option><option>No Subscription</option><option>Payment Failed</option><option>Other</option></select>
+            <select class="inactive-select" aria-label="Region filter"><option>All Regions</option><option>North America</option><option>Europe</option><option>Asia Pacific</option><option>South America</option></select>
+            <button class="inactive-tool" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg>Filters</button>
+            <button class="inactive-tool" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>Export</button>
+          </div>
+
+          <div class="inactive-table-wrap">
+            <table class="inactive-table">
+              <thead><tr><th>Organization</th><th>Plan</th><th>Users</th><th>Last Active</th><th>Inactive Since</th><th>Inactive Reason</th><th>Region</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#3d8bff;">B</span><div><div class="inactive-name">BlueShield Corp</div><div class="inactive-domain">blueshield.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#0088ff;">Business</span></td><td>24 / 50</td><td>Apr 20, 2025</td><td><span class="inactive-days">23 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#b22234;--flag-b:#fff;--flag-c:#3c3b6e;"></span>United States</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#8d6aff;">Q</span><div><div class="inactive-name">Quantum Solutions</div><div class="inactive-domain">quantumsol.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#8d6aff;">Pro</span></td><td>12 / 20</td><td>Apr 12, 2025</td><td><span class="inactive-days">31 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#ff0000;--flag-b:#fff;--flag-c:#ff0000;"></span>Canada</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#202a3a;">N</span><div><div class="inactive-name">Nexus Technologies</div><div class="inactive-domain">nexustech.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#ff9700;">Enterprise</span></td><td>45 / 100</td><td>Mar 28, 2025</td><td><span class="inactive-days">46 days</span></td><td><span class="inactive-reason" style="--pill:#ff9700;">No Subscription</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#012169;--flag-b:#fff;--flag-c:#c8102e;"></span>United Kingdom</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#ff4d65;">C</span><div><div class="inactive-name">CyberVale Ltd.</div><div class="inactive-domain">cybervale.co</div></div></div></td><td><span class="inactive-plan" style="--pill:#0088ff;">Business</span></td><td>18 / 50</td><td>Mar 25, 2025</td><td><span class="inactive-days">49 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#0052b4;--flag-b:#fff;--flag-c:#d80027;"></span>Australia</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#bf6bff;">D</span><div><div class="inactive-name">DataCore Systems</div><div class="inactive-domain">datacore.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#8d6aff;">Pro</span></td><td>9 / 20</td><td>Mar 10, 2025</td><td><span class="inactive-days">64 days</span></td><td><span class="inactive-reason" style="--pill:#ff9700;">No Subscription</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#000;--flag-b:#dd0000;--flag-c:#ffce00;"></span>Germany</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#546a7b;">I</span><div><div class="inactive-name">Infosec Global</div><div class="inactive-domain">infosecglobal.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#0088ff;">Business</span></td><td>16 / 50</td><td>Feb 28, 2025</td><td><span class="inactive-days">74 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#ff9933;--flag-b:#fff;--flag-c:#138808;"></span>India</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#ff354d;">S</span><div><div class="inactive-name">SecureMesh Inc.</div><div class="inactive-domain">securemesh.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#ff9700;">Enterprise</span></td><td>38 / 100</td><td>Feb 15, 2025</td><td><span class="inactive-days">87 days</span></td><td><span class="inactive-reason" style="--pill:#ff354d;">Payment Failed</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#ef3340;--flag-b:#fff;--flag-c:#ef3340;"></span>Singapore</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#3d8bff;">A</span><div><div class="inactive-name">AlphaPoint Labs</div><div class="inactive-domain">alphapoint.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#8d6aff;">Pro</span></td><td>7 / 20</td><td>Feb 01, 2025</td><td><span class="inactive-days">101 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#0055a4;--flag-b:#fff;--flag-c:#ef4135;"></span>France</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#8d6aff;">T</span><div><div class="inactive-name">TechFrontier</div><div class="inactive-domain">techfrontier.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#0088ff;">Business</span></td><td>14 / 50</td><td>Jan 20, 2025</td><td><span class="inactive-days">113 days</span></td><td><span class="inactive-reason" style="--pill:#ff9700;">No Subscription</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#009b3a;--flag-b:#ffdf00;--flag-c:#002776;"></span>Brazil</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+                <tr><td><div class="inactive-org"><span class="inactive-logo" style="--avatar:#6b7a90;">V</span><div><div class="inactive-name">Vertex Analytics</div><div class="inactive-domain">vertexanalytics.com</div></div></div></td><td><span class="inactive-plan" style="--pill:#8d6aff;">Pro</span></td><td>6 / 20</td><td>Jan 10, 2025</td><td><span class="inactive-days">123 days</span></td><td><span class="inactive-reason" style="--pill:#8d6aff;">No Login Activity</span></td><td><span class="inactive-region"><span class="inactive-flag" style="--flag-a:#b22234;--flag-b:#fff;--flag-c:#3c3b6e;"></span>United States</span></td><td><div class="inactive-actions"><button class="inactive-view" type="button">View</button><button class="inactive-icon-btn" type="button">...</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="inactive-footer">
+            <span>Showing 1 to 10 of 324 inactive organizations</span>
+            <div class="inactive-pager"><button class="inactive-page" type="button">&lt;</button><button class="inactive-page active" type="button">1</button><button class="inactive-page" type="button">2</button><button class="inactive-page" type="button">3</button><span>...</span><button class="inactive-page" type="button">33</button><button class="inactive-page" type="button">&gt;</button><select class="inactive-page-size" aria-label="Rows per page"><option>10 / page</option><option>25 / page</option><option>50 / page</option></select></div>
+          </footer>
+        </article>
+
+        <aside class="inactive-side" aria-label="Inactive organization insights">
+          <article class="inactive-panel inactive-side-card"><div class="inactive-heading"><h3 class="inactive-title">Inactive Overview</h3><a class="inactive-link" href="#">View Report</a></div><div class="inactive-overview"><div class="inactive-donut" aria-hidden="true"><span class="inactive-donut-text"><strong>324</strong>Total Inactive</span></div><ul class="inactive-list"><li class="inactive-legend"><span class="inactive-swatch" style="--swatch:#ff9700;"></span><span>No Login Activity</span><span>168 (51.9%)</span></li><li class="inactive-legend"><span class="inactive-swatch" style="--swatch:#0088ff;"></span><span>No Subscription</span><span>82 (25.3%)</span></li><li class="inactive-legend"><span class="inactive-swatch" style="--swatch:#ff354d;"></span><span>Payment Failed</span><span>42 (13.0%)</span></li><li class="inactive-legend"><span class="inactive-swatch" style="--swatch:#8ba0bd;"></span><span>Other</span><span>32 (9.8%)</span></li></ul></div></article>
+          <article class="inactive-panel inactive-side-card"><div class="inactive-heading"><div><h3 class="inactive-title">Inactive Organizations Over Time</h3><p class="inactive-chart-meta">324 <span>+ 12.3% vs previous 30 days</span></p></div><select class="inactive-range" aria-label="Chart range"><option>Last 30 Days</option></select></div><div class="inactive-chart"><svg class="inactive-line-chart" viewBox="0 0 310 130" aria-hidden="true"><defs><linearGradient id="inactiveArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8d6aff" stop-opacity=".42" /><stop offset="1" stop-color="#8d6aff" stop-opacity="0" /></linearGradient></defs><path d="M0 100 L18 78 L36 84 L54 71 L72 78 L90 66 L108 68 L126 52 L144 48 L162 32 L180 45 L198 30 L216 23 L234 38 L252 34 L270 48 L288 24 L310 18 L310 124 L0 124 Z" fill="url(#inactiveArea)" /><path d="M0 100 L18 78 L36 84 L54 71 L72 78 L90 66 L108 68 L126 52 L144 48 L162 32 L180 45 L198 30 L216 23 L234 38 L252 34 L270 48 L288 24 L310 18" fill="none" stroke="#8d6aff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /><g stroke="rgba(130,151,186,.16)"><path d="M0 30H310" /><path d="M0 60H310" /><path d="M0 90H310" /><path d="M0 120H310" /></g><g fill="#7d899f" font-size="10"><text x="0" y="128">Apr 15</text><text x="72" y="128">Apr 22</text><text x="144" y="128">Apr 29</text><text x="218" y="128">May 6</text><text x="278" y="128">May 13</text></g></svg></div></article>
+          <article class="inactive-panel inactive-side-card"><div class="inactive-heading"><h3 class="inactive-title">Top Inactive Reasons</h3><a class="inactive-link" href="#">View All</a></div><ul class="reason-list"><li class="reason-item"><span>No Login Activity</span><span class="reason-bar"><span class="reason-fill" style="--fill:100%; --bar:#8d6aff;"></span></span><span>168 (51.9%)</span></li><li class="reason-item"><span>No Subscription</span><span class="reason-bar"><span class="reason-fill" style="--fill:49%; --bar:#ff9700;"></span></span><span>82 (25.3%)</span></li><li class="reason-item"><span>Payment Failed</span><span class="reason-bar"><span class="reason-fill" style="--fill:25%; --bar:#ff354d;"></span></span><span>42 (13.0%)</span></li><li class="reason-item"><span>Other</span><span class="reason-bar"><span class="reason-fill" style="--fill:19%; --bar:#8ba0bd;"></span></span><span>32 (9.8%)</span></li></ul></article>
+          <article class="inactive-panel inactive-side-card"><div class="inactive-heading"><h3 class="inactive-title">Quick Actions</h3></div><ul class="inactive-quick"><li><span class="quick-box" style="--quick:#8d6aff;">E</span><span><span class="quick-name">Send Re-engagement Email</span><span class="quick-text">Reach out to inactive organizations</span></span><span>-&gt;</span></li><li><span class="quick-box" style="--quick:#3d8bff;">R</span><span><span class="quick-name">Reactivate Organization</span><span class="quick-text">Reactivate a selected organization</span></span><span>-&gt;</span></li><li><span class="quick-box" style="--quick:#00d884;">X</span><span><span class="quick-name">Export Inactive List</span><span class="quick-text">Download list of inactive organizations</span></span><span>-&gt;</span></li></ul></article>
+        </aside>
+      </section>
+    </main>
+
+
+
+
+
+
+
+
+
+
+
+    
+  
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

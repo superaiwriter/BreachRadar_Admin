@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .tickets-page {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 84px 14px 18px;
+    }
+
+    .tickets-wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .summary-grid,
+    .tickets-main-grid,
+    .ticket-insights-grid,
+    .tickets-bottom-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      margin-bottom: 12px;
+    }
+
+    .tickets-main-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ticket-insights-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .tickets-bottom-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .ticket-card {
+      background: linear-gradient(180deg, rgba(7, 19, 37, 0.97), rgba(3, 11, 24, 0.98));
+      border: 1px solid rgba(87, 112, 151, 0.18);
+      border-radius: 7px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .summary-card {
+      min-height: 110px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .summary-label,
+    .muted,
+    .table th {
+      margin: 0;
+      color: #8b96aa;
+      line-height: 1.35;
+    }
+
+    .summary-value {
+      margin: 10px 0 4px;
+      color: #fff;
+      font-size: 21px !important;
+      line-height: 1;
+    }
+
+    .trend {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      margin-top: 9px;
+      color: #18d781;
+    }
+
+    .summary-icon,
+    .agent-avatar,
+    .category-icon {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .summary-icon {
+      width: 34px;
+      height: 34px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+      border-radius: 999px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      margin: 0 0 4px;
+      color: #fff;
+      font-size: 15px !important;
+      line-height: 1.2;
+    }
+
+    .panel-actions,
+    .filters-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .icon-btn,
+    .ghost-btn,
+    .filter-select,
+    .search-field {
+      min-height: 30px;
+      border-radius: 5px;
+      border: 1px solid rgba(105, 126, 163, 0.18);
+      background: #071225;
+      color: #dbe4f6;
+      font: inherit;
+      outline: 0;
+    }
+
+    .ghost-btn {
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+    }
+
+    .icon-btn {
+      width: 30px;
+      display: inline-grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(105, 126, 163, 0.16);
+      overflow-x: visible;
+    }
+
+    .tab {
+      position: relative;
+      min-height: 33px;
+      color: #aab5ca;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: #9e7cff;
+    }
+
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: #7b55ff;
+      border-radius: 999px;
+    }
+
+    .filters-row {
+      margin-bottom: 12px;
+    }
+
+    .search-field {
+      width: min(240px, 100%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      color: #9ba7bd;
+    }
+
+    .search-field input {
+      width: 100%;
+      min-width: 0;
+      color: #dbe4f6;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+    }
+
+    .filter-select {
+      padding: 0 10px;
+      min-width: 105px;
+    }
+
+    .table-wrap {
+      overflow-x: visible;
+    }
+
+    .table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      padding: 8px 5px;
+      border-bottom: 1px solid rgba(105, 126, 163, 0.11);
+      text-align: left;
+      color: #dce4f5;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .ticket-id {
+      color: #78a6ff;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 0 8px;
+      border-radius: 4px;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+      white-space: nowrap;
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 13px;
+      color: #8d98ad;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-btn {
+      width: 26px;
+      height: 26px;
+      display: inline-grid;
+      place-items: center;
+      color: #aeb9cb;
+      background: #071225;
+      border: 1px solid rgba(105, 126, 163, 0.18);
+      border-radius: 5px;
+    }
+
+    .page-btn.active {
+      color: #fff;
+      background: #6f4dff;
+      border-color: #6f4dff;
+    }
+
+    .donut-layout {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .donut {
+      position: relative;
+      width: 150px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: conic-gradient(#1e9aff 0 11.4%, #f2aa25 11.4% 16.9%, #7b55ff 16.9% 24.8%, #18d781 24.8% 100%);
+      margin: 0 auto;
+    }
+
+    .donut::after {
+      content: "";
+      position: absolute;
+      inset: 28%;
+      border-radius: 50%;
+      background: #071225;
+      border: 1px solid rgba(105, 126, 163, 0.18);
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .donut-center strong {
+      display: block;
+      color: #fff;
+      font-size: 20px !important;
+    }
+
+    .legend-list,
+    .category-list,
+    .action-list,
+    .unassigned-list,
+    .agent-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend-list li,
+    .category-list li {
+      display: grid;
+      grid-template-columns: 10px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      color: #cdd7e9;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 70px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      color: #dce4f5;
+    }
+
+    .bar-track {
+      height: 5px;
+      border-radius: 99px;
+      background: rgba(126, 145, 184, 0.18);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      display: block;
+      width: var(--w);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .categories {
+      margin-top: 22px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(105, 126, 163, 0.13);
+    }
+
+    .mini-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .text-link {
+      color: #9e7cff;
+      text-decoration: none;
+      background: transparent;
+      border: 0;
+      font: inherit;
+    }
+
+    .sla-line {
+      margin: 15px 0;
+    }
+
+    .progress-track {
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(126, 145, 184, 0.18);
+      overflow: hidden;
+      margin: 6px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: var(--w);
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .unassigned-list li,
+    .agent-list li {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(105, 126, 163, 0.09);
+    }
+
+    .unassigned-list li:last-child,
+    .agent-list li:last-child {
+      border-bottom: 0;
+    }
+
+    .subject {
+      display: block;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .agent-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 34%, #ffe1ca 0 26%, transparent 27%),
+        linear-gradient(135deg, #f3bf99 0 48%, #315e91 49% 100%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .quick-action {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 10px;
+      color: #dbe4f6;
+      background: #071225;
+      border: 1px solid rgba(105, 126, 163, 0.15);
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    @media (max-width: 1280px) {
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .tickets-main-grid,
+      .ticket-insights-grid,
+      .tickets-bottom-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .tickets-page {
+        margin-left: 0;
+        padding: 90px 12px 170px;
+      }
+
+      .topbar {
+        left: 0;
+      }
+
+      .sidebar {
+        position: static;
+        width: 100%;
+        min-height: auto;
+        max-height: 40vh;
+        overflow: auto;
+      }
+
+      .tickets-main-grid,
+      .ticket-insights-grid,
+      .tickets-bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .donut-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-header,
+      .table-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filters-row > *,
+      .panel-actions > *,
+      .search-field {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+
+      .tickets-page {
+        padding-top: 12px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Shared plain typography */
+    body,
+    body * {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-weight: 400 !important;
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    body :is(div, p, span, a, button, input, select, textarea, label, li, td, th, small, strong, b) {
+      font-size: max(11px, 1em) !important;
+    }
+
+    body :is(h1, h2, h3, h4, h5, h6) {
+      font-size: max(14px, 1em) !important;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html" data-page="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="tickets-page" aria-label="Support tickets dashboard">
+      <div class="tickets-wrap">
+        <section class="summary-grid" aria-label="Ticket summary">
+          <article class="ticket-card summary-card" style="--accent:#8b5cff;"><div><p class="summary-label">Total Tickets</p><h3 class="summary-value">1,248</h3><p class="trend">+ 18.6% vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18v5a2 2 0 1 0 0 4v5H3v-5a2 2 0 1 0 0-4Z"/><path d="M13 7v10"/></svg></span></article>
+          <article class="ticket-card summary-card" style="--accent:#f27f18;"><div><p class="summary-label">Open Tickets</p><h3 class="summary-value">142</h3><p class="trend">+ 12.4% vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18v5a2 2 0 1 0 0 4v5H3v-5a2 2 0 1 0 0-4Z"/><path d="M8 12h8"/></svg></span></article>
+          <article class="ticket-card summary-card" style="--accent:#f0b41b;"><div><p class="summary-label">Pending Tickets</p><h3 class="summary-value">68</h3><p class="trend">+ 8.7% vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></article>
+          <article class="ticket-card summary-card" style="--accent:#18d781;"><div><p class="summary-label">Resolved Tickets</p><h3 class="summary-value">1,038</h3><p class="trend">+ 24.3% vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m20 6-11 11-5-5"/></svg></span></article>
+          <article class="ticket-card summary-card" style="--accent:#1e9aff;"><div><p class="summary-label">SLA Met</p><h3 class="summary-value">96.8%</h3><p class="trend">+ 2.5% vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg></span></article>
+          <article class="ticket-card summary-card" style="--accent:#7b55ff;"><div><p class="summary-label">Avg. Response Time</p><h3 class="summary-value">2h 34m</h3><p class="trend">+ 18m vs last 30 days</p></div><span class="summary-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/><path d="M12 2v2"/></svg></span></article>
+        </section>
+
+        <section class="tickets-main-grid">
+          <article class="ticket-card">
+            <div class="card-body">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Tickets</h3>
+                  <p class="muted">View and manage all support tickets.</p>
+                </div>
+                <div class="panel-actions">
+                  <button class="ghost-btn" type="button">Export</button>
+                  <button class="icon-btn" type="button" aria-label="Download"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+                </div>
+              </div>
+              <div class="tabs" role="tablist">
+                <button class="tab active" type="button">All Tickets</button>
+                <button class="tab" type="button">My Tickets</button>
+                <button class="tab" type="button">Unassigned</button>
+                <button class="tab" type="button">SLA Breached</button>
+              </div>
+              <div class="filters-row">
+                <label class="search-field"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search tickets..."></label>
+                <select class="filter-select"><option>Status</option></select>
+                <select class="filter-select"><option>Priority</option></select>
+                <select class="filter-select"><option>Category</option></select>
+                <select class="filter-select"><option>All Organizations</option></select>
+                <button class="ghost-btn" type="button">More Filters</button>
+              </div>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Ticket ID</th><th>Subject</th><th>Organization</th><th>Requester</th><th>Priority</th><th>Status</th><th>SLA</th><th>Updated</th><th>Assignee</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td class="ticket-id">#TK-1250</td><td>Unable to login to account</td><td>Acme Corp</td><td>John Doe</td><td><span class="pill" style="--accent:#ff405f;">High</span></td><td><span class="pill" style="--accent:#1e9aff;">Open</span></td><td><span class="pill" style="--accent:#1e9aff;">In Progress</span></td><td>10 min ago</td><td>Sarah W.</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1249</td><td>Scan not completing</td><td>Globex Inc.</td><td>Mike Johnson</td><td><span class="pill" style="--accent:#f0b41b;">Medium</span></td><td><span class="pill" style="--accent:#f0b41b;">Pending</span></td><td><span class="pill" style="--accent:#1e9aff;">In Progress</span></td><td>32 min ago</td><td>David L.</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1248</td><td>False positive in alert</td><td>Stark Industries</td><td>Tony Stark</td><td><span class="pill" style="--accent:#18d781;">Low</span></td><td><span class="pill" style="--accent:#1e9aff;">Open</span></td><td><span class="pill" style="--accent:#1e9aff;">In Progress</span></td><td>45 min ago</td><td>Unassigned</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1247</td><td>API integration issue</td><td>Wayne Enterprises</td><td>Bruce Wayne</td><td><span class="pill" style="--accent:#ff405f;">High</span></td><td><span class="pill" style="--accent:#f0b41b;">Pending</span></td><td><span class="pill" style="--accent:#ff405f;">SLA Breached</span></td><td>1 hr ago</td><td>Sarah W.</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1246</td><td>Billing &amp; invoice query</td><td>Umbrella Corp</td><td>Alice Cooper</td><td><span class="pill" style="--accent:#f0b41b;">Medium</span></td><td><span class="pill" style="--accent:#18d781;">Resolved</span></td><td><span class="pill" style="--accent:#18d781;">Met</span></td><td>2 hrs ago</td><td>David L.</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1245</td><td>Need help with reports</td><td>Cyberdyne Systems</td><td>Sarah Connor</td><td><span class="pill" style="--accent:#18d781;">Low</span></td><td><span class="pill" style="--accent:#18d781;">Resolved</span></td><td><span class="pill" style="--accent:#18d781;">Met</span></td><td>3 hrs ago</td><td>Michael R.</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1244</td><td>Feature request: Export</td><td>Initech</td><td>Peter Gibbons</td><td><span class="pill" style="--accent:#18d781;">Low</span></td><td><span class="pill" style="--accent:#1e9aff;">Open</span></td><td><span class="pill" style="--accent:#1e9aff;">In Progress</span></td><td>5 hrs ago</td><td>Unassigned</td><td><button class="icon-btn">...</button></td></tr>
+                    <tr><td class="ticket-id">#TK-1243</td><td>2FA not working</td><td>Hooli</td><td>Richard Hendricks</td><td><span class="pill" style="--accent:#ff405f;">High</span></td><td><span class="pill" style="--accent:#f0b41b;">Pending</span></td><td><span class="pill" style="--accent:#ff405f;">SLA Breached</span></td><td>1 day ago</td><td>Sarah W.</td><td><button class="icon-btn">...</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer"><span>Showing 1 to 8 of 1,248 tickets</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">...</button><button class="page-btn">156</button><button class="page-btn">&gt;</button></div></div>
+            </div>
+          </article>
+
+        </section>
+
+        <section class="ticket-insights-grid" aria-label="Ticket insights">
+          <article class="ticket-card">
+            <div class="card-body">
+              <div class="panel-header"><h3 class="panel-title">Tickets by Status</h3></div>
+              <div class="donut-layout">
+                <div class="donut"><div class="donut-center"><span class="muted">Total</span><strong>1,248</strong><span class="muted">Tickets</span></div></div>
+                <ul class="legend-list">
+                  <li style="--accent:#1e9aff;"><i class="dot"></i><span>Open</span><span>142 (11.4%)</span></li>
+                  <li style="--accent:#f0b41b;"><i class="dot"></i><span>Pending</span><span>68 (5.4%)</span></li>
+                  <li style="--accent:#7b55ff;"><i class="dot"></i><span>In Progress</span><span>98 (7.8%)</span></li>
+                  <li style="--accent:#18d781;"><i class="dot"></i><span>Resolved</span><span>1,038 (83.2%)</span></li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="ticket-card">
+            <div class="card-body">
+              <h3 class="panel-title">Tickets by Priority</h3>
+              <div class="bar-row" style="--accent:#ff405f;--w:70%;"><span>High</span><div class="bar-track"><i class="bar-fill"></i></div><span>352 (28.2%)</span></div>
+              <div class="bar-row" style="--accent:#f27f18;--w:84%;"><span>Medium</span><div class="bar-track"><i class="bar-fill"></i></div><span>521 (41.7%)</span></div>
+              <div class="bar-row" style="--accent:#18d781;--w:57%;"><span>Low</span><div class="bar-track"><i class="bar-fill"></i></div><span>375 (30.1%)</span></div>
+            </div>
+          </article>
+
+          <article class="ticket-card">
+            <div class="card-body">
+              <div class="mini-header"><h3 class="panel-title">Top Ticket Categories</h3><a class="text-link" href="#">View All</a></div>
+              <ul class="category-list">
+                <li style="--accent:#7180a5;"><i class="dot"></i><span>Account &amp; Access</span><span>348 (27.9%)</span></li>
+                <li style="--accent:#7180a5;"><i class="dot"></i><span>Scan &amp; Threats</span><span>287 (23.0%)</span></li>
+                <li style="--accent:#7180a5;"><i class="dot"></i><span>Billing &amp; Payments</span><span>196 (15.7%)</span></li>
+                <li style="--accent:#7b55ff;"><i class="dot"></i><span>Integrations</span><span>154 (12.3%)</span></li>
+                <li style="--accent:#7b55ff;"><i class="dot"></i><span>Reports</span><span>132 (10.6%)</span></li>
+                <li style="--accent:#7b55ff;"><i class="dot"></i><span>Other</span><span>131 (10.5%)</span></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+
+        <section class="tickets-bottom-grid">
+          <article class="ticket-card"><div class="card-body"><div class="mini-header"><h3 class="panel-title">SLA Overview</h3><a class="text-link" href="#">View Details</a></div><div class="sla-line" style="--accent:#18d781;--w:96.8%;"><p class="muted">SLA Met <span style="float:right;color:#18d781;">96.8%</span></p><div class="progress-track"><i class="progress-fill"></i></div><h3 class="summary-value">1,207</h3></div><div class="sla-line" style="--accent:#ff405f;--w:3.2%;"><p class="muted">SLA Breached <span style="float:right;color:#ff405f;">3.2%</span></p><div class="progress-track"><i class="progress-fill"></i></div><h3 class="summary-value">41</h3></div><p class="muted">Average Response Time</p><h3 class="panel-title">2h 34m</h3><p class="trend">+18m vs last 30 days</p></div></article>
+          <article class="ticket-card"><div class="card-body"><div class="mini-header"><h3 class="panel-title">Unassigned Tickets</h3><a class="text-link" href="#">View All</a></div><ul class="unassigned-list"><li><span class="ticket-id">#TK-1248</span><span><b class="subject">False positive in alert</b><span class="muted">Stark Industries</span></span><span class="muted">45 min ago</span><span class="pill" style="--accent:#18d781;">Low</span></li><li><span class="ticket-id">#TK-1244</span><span><b class="subject">Feature request: Export</b><span class="muted">Initech</span></span><span class="muted">5 hrs ago</span><span class="pill" style="--accent:#18d781;">Low</span></li><li><span class="ticket-id">#TK-1240</span><span><b class="subject">Unable to update profile</b><span class="muted">Oscorp</span></span><span class="muted">6 hrs ago</span><span class="pill" style="--accent:#f0b41b;">Medium</span></li><li><span class="ticket-id">#TK-1238</span><span><b class="subject">Dashboard not loading</b><span class="muted">Soylent Corp</span></span><span class="muted">1 day ago</span><span class="pill" style="--accent:#ff405f;">High</span></li></ul><div class="table-footer"><span>Total Unassigned: 12</span><button class="ghost-btn">View All Unassigned</button></div></div></article>
+          <article class="ticket-card"><div class="card-body"><div class="panel-header"><h3 class="panel-title">Support Agents</h3></div><div class="table-wrap"><table class="table"><thead><tr><th></th><th></th><th>Tickets</th><th>Avg. Response</th><th>SLA Met</th></tr></thead><tbody><tr><td><span class="agent-avatar"></span></td><td>Sarah Wilson</td><td>24</td><td>15m</td><td style="color:#18d781;">98%</td></tr><tr><td><span class="agent-avatar"></span></td><td>David Lee</td><td>32</td><td>45m</td><td style="color:#18d781;">95%</td></tr><tr><td><span class="agent-avatar"></span></td><td>Michael Rodriguez</td><td>18</td><td>1h 10m</td><td style="color:#18d781;">97%</td></tr><tr><td><span class="agent-avatar"></span></td><td>Emily Clark</td><td>16</td><td>30m</td><td style="color:#18d781;">96%</td></tr><tr><td><span class="agent-avatar"></span></td><td>James Taylor</td><td>14</td><td>2h</td><td style="color:#18d781;">94%</td></tr></tbody></table></div><div class="table-footer"><span>Showing 1 to 5 of 8 agents</span><div class="pager"><button class="page-btn">&lt;</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">&gt;</button></div></div></div></article>
+          <article class="ticket-card"><div class="card-body"><h3 class="panel-title" style="margin-bottom:14px;">Quick Actions</h3><nav class="action-list"><a class="quick-action" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14"/><path d="M5 12h14"/></svg>New Ticket</a><a class="quick-action" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>View All Tickets</a><a class="quick-action" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>SLA Rules &amp; Policies</a><a class="quick-action" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h6"/></svg>Ticket Categories</a><a class="quick-action" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9"/></svg>Support Settings</a></nav></div></article>
+        </section>
+      </div>
+    </main>
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

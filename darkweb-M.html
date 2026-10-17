@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 245px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: min(420px, 34vw);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 17px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 205px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .darkweb-dashboard {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding: 86px 18px 52px;
+      background:
+        radial-gradient(circle at 18% 0, rgba(28, 116, 183, 0.18), transparent 30rem),
+        radial-gradient(circle at 78% 8%, rgba(111, 77, 255, 0.12), transparent 28rem),
+        linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+    }
+
+    .dashboard-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .dashboard-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .dashboard-copy {
+      margin: 5px 0 0;
+      color: #b0bad0;
+      font-size: 12px;
+    }
+
+    .dashboard-date {
+      margin: 5px 0 0;
+      color: #94a0b7;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .metric-card,
+    .dash-card {
+      border: 1px solid rgba(104, 125, 163, 0.13);
+      background:
+        linear-gradient(180deg, rgba(8, 24, 45, 0.92), rgba(5, 16, 31, 0.96)),
+        #06101f;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 18px 40px rgba(0, 0, 0, 0.16);
+      border-radius: 8px;
+    }
+
+    .metric-card {
+      min-height: 104px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::after {
+      content: "";
+      position: absolute;
+      inset: -45px -35px auto auto;
+      width: 110px;
+      height: 110px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(111, 77, 255, 0.2), transparent 70%);
+    }
+
+    .metric-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #9faac0;
+      font-size: 12px;
+    }
+
+    .metric-icon,
+    .mini-icon {
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      background: rgba(111, 77, 255, 0.18);
+    }
+
+    .metric-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+    }
+
+    .metric-value {
+      margin: 5px 0 0;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .metric-change {
+      margin: 10px 0 0;
+      color: #20df78;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .metric-change.down {
+      color: #ff4161;
+    }
+
+    .metric-sub {
+      margin: 6px 0 0;
+      color: #8f9ab0;
+      font-size: 11px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.86fr) minmax(330px, 0.9fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .dashboard-grid.lower {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1.25fr);
+    }
+
+    .dash-card {
+      padding: 14px 16px;
+      min-width: 0;
+    }
+
+    .wide-card {
+      grid-column: span 2;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .select-pill,
+    .ghost-btn {
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(122, 139, 174, 0.16);
+      background: #071225;
+      color: #d9e0ee;
+      padding: 0 9px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .link-btn {
+      color: #a169ff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .line-chart {
+      height: 190px;
+      position: relative;
+      margin-bottom: 8px;
+      border-left: 1px solid rgba(154, 170, 205, 0.08);
+      border-bottom: 1px solid rgba(154, 170, 205, 0.08);
+      background:
+        repeating-linear-gradient(to top, transparent 0 48px, rgba(154, 170, 205, 0.07) 49px),
+        repeating-linear-gradient(to right, transparent 0 80px, rgba(154, 170, 205, 0.035) 81px);
+      overflow: visible;
+    }
+
+    .line-chart svg {
+      position: absolute;
+      inset: 8px 8px 26px 34px;
+      width: calc(100% - 42px);
+      height: calc(100% - 34px);
+      overflow: visible;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      color: #aab5c9;
+      font-size: 11px;
+      margin-bottom: 9px;
+      padding-left: 32px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      border-radius: 999px;
+      margin-right: 7px;
+    }
+
+    .chart-axis {
+      position: absolute;
+      color: #8490a6;
+      font-size: 11px;
+    }
+
+    .axis-left {
+      left: 6px;
+      transform: translateY(-50%);
+    }
+
+    .axis-bottom {
+      bottom: 2px;
+      transform: translateX(-50%);
+    }
+
+    .donut-wrap {
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+    }
+
+    .donut {
+      --a: #ff2d2d;
+      --b: #ff8a00;
+      --c: #ffc31b;
+      --d: #2b8cff;
+      --e: #2655b8;
+      width: 142px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--a) 0 8%, var(--b) 8% 35%, var(--c) 35% 73%, var(--d) 73% 92%, var(--e) 92% 100%);
+      box-shadow: 0 0 34px rgba(45, 140, 255, 0.16);
+    }
+
+    .donut.source {
+      --a: #764cff;
+      --b: #2d85ff;
+      --c: #15bb62;
+      --d: #ff9b25;
+      --e: #768094;
+      background: conic-gradient(var(--a) 0 42%, var(--b) 42% 72%, var(--c) 72% 89%, var(--d) 89% 97%, var(--e) 97% 100%);
+    }
+
+    .donut-center {
+      width: 84px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 50%;
+      background: #06101f;
+      color: white;
+      font-size: 12px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+
+    .donut-center strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .legend-list,
+    .alert-list,
+    .source-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend-item,
+    .source-row,
+    .alert-row {
+      display: grid;
+      grid-template-columns: 11px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      color: #c6cedf;
+      font-size: 12px;
+    }
+
+    .legend-swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+    }
+
+    .table-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .mini-search {
+      min-width: min(320px, 100%);
+      flex: 1;
+      justify-content: flex-start;
+      color: #7f8ba2;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 720px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(122, 139, 174, 0.08);
+      color: #cbd3e2;
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      color: #8691a8;
+      font-weight: 500;
+    }
+
+    .mention-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .mention-title small {
+      display: block;
+      margin-top: 2px;
+      color: #8793aa;
+      font-weight: 400;
+    }
+
+    .mini-icon {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 7px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag.critical { color: #ff786d; background: rgba(255, 45, 45, 0.16); }
+    .tag.high { color: #ffae35; background: rgba(255, 138, 0, 0.16); }
+    .tag.medium { color: #ffd23b; background: rgba(255, 195, 27, 0.15); }
+    .tag.low { color: #58a4ff; background: rgba(45, 140, 255, 0.16); }
+    .tag.active { color: #24dc78; background: rgba(24, 197, 104, 0.14); }
+
+    .kebab {
+      width: 30px;
+      height: 26px;
+      border-radius: 5px;
+      border: 1px solid rgba(122, 139, 174, 0.12);
+      background: #071225;
+      color: #b8c1d3;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      color: #b7c0d4;
+      font-size: 12px;
+    }
+
+    .pages {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-btn {
+      min-width: 34px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: #dfe6f5;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.14);
+      border-radius: 7px;
+      font-size: 12px;
+    }
+
+    .page-btn.active {
+      background: linear-gradient(180deg, #744dff, #4e2bd2);
+      color: white;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 15px;
+      margin-top: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr) 82px;
+      align-items: center;
+      gap: 14px;
+      color: #dbe2ef;
+      font-size: 12px;
+    }
+
+    .bar-track {
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(126, 143, 177, 0.18);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6f4dff, #a65cff);
+    }
+
+    .simple-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .simple-table th,
+    .simple-table td {
+      padding: 8px 0;
+      color: #cbd3e2;
+      text-align: left;
+      border-bottom: 1px solid rgba(122, 139, 174, 0.07);
+    }
+
+    .simple-table th {
+      color: #8e99ae;
+      font-weight: 500;
+    }
+
+    .change-up {
+      color: #20df78;
+      font-weight: 700;
+    }
+
+    .alert-row {
+      grid-template-columns: 34px minmax(0, 1fr) auto auto;
+      padding-bottom: 9px;
+      border-bottom: 1px solid rgba(122, 139, 174, 0.07);
+    }
+
+    .alert-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .alert-copy {
+      color: white;
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .alert-copy small {
+      display: block;
+      margin-top: 3px;
+      color: #8d98ad;
+      font-weight: 400;
+    }
+
+    .footer-bar {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #8995aa;
+      font-size: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 38px;
+      flex-wrap: wrap;
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .panel-card {
+      padding: 16px;
+      min-height: 112px;
+    }
+
+    .panel-value {
+      margin: 10px 0 0;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .panel-note {
+      margin: 8px 0 0;
+      color: #8f9ab0;
+      font-size: 12px;
+    }
+
+    .content-view-head {
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 1280px) {
+      .metric-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .dashboard-grid,
+      .dashboard-grid.lower {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .wide-card {
+        grid-column: span 2;
+      }
+
+      .dashboard-grid>.dash-card:nth-child(3) {
+        grid-column: span 2;
+      }
+
+      .exposed-card {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .metric-grid,
+      .dashboard-grid,
+      .dashboard-grid.lower {
+        grid-template-columns: 1fr;
+      }
+
+      .wide-card {
+        grid-column: auto;
+      }
+
+      .exposed-card {
+        grid-column: auto;
+      }
+
+      .donut-wrap {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .legend-list {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .darkweb-dashboard {
+        margin-left: 0;
+        padding: 18px 12px 190px;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+
+      .dashboard-head,
+      .pager,
+      .footer-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .dashboard-title {
+        font-size: 21px;
+      }
+
+      .card-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .table-tools {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html" data-page="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="subscrip.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="organiz.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="roles.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="api.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="aduit.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="announ.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="osint-dashboard.html" data-view="dashboard"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="user-management.html" data-view="users"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="varification-request.html" data-view="verification"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="osint-intelligence.html" data-view="intelligence"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="montdashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="threats&alerts.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="scann.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="darkweb-M.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="Report-R.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="integration.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="settingg.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="bill&plan.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="syshealth.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="supticket.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="darkweb-dashboard">
+      <section class="dashboard-head">
+        <div>
+          <h1 class="dashboard-title">Dark Web Monitoring</h1>
+          <p class="dashboard-copy">Monitor and detect exposed data, credentials, and threats on the dark web.</p>
+        </div>
+        <p class="dashboard-date">System Time: May 15, 2025 - 10:30 AM</p>
+      </section>
+
+      <section class="metric-grid" aria-label="Dark web metrics">
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>Total Mentions</span>
+            <span class="metric-icon" style="color:#8b5cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+          </div>
+          <p class="metric-value">3,248</p>
+          <p class="metric-change">↑ 18.7%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>New Mentions</span>
+            <span class="metric-icon" style="color:#2d85ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></span>
+          </div>
+          <p class="metric-value">512</p>
+          <p class="metric-change">↑ 21.3%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>High Risk Mentions</span>
+            <span class="metric-icon" style="color:#ff2d45;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 8v5M12 17h.01"/></svg></span>
+          </div>
+          <p class="metric-value">256</p>
+          <p class="metric-change down">↑ 12.8%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>Data Breach Mentions</span>
+            <span class="metric-icon" style="color:#ff9b25;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+          </div>
+          <p class="metric-value">142</p>
+          <p class="metric-change">↑ 9.6%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>Domains Monitored</span>
+            <span class="metric-icon" style="color:#8b5cff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg></span>
+          </div>
+          <p class="metric-value">1,856</p>
+          <p class="metric-change">↑ 15.2%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top">
+            <span>Sources Monitored</span>
+            <span class="metric-icon" style="color:#1478ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M10.4 7.3 6.6 16.7M13.6 7.3l3.8 9.4M8 19h8"/></svg></span>
+          </div>
+          <p class="metric-value">842</p>
+          <p class="metric-change">↑ 11.7%</p>
+          <p class="metric-sub">vs last 30 days</p>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="dash-card">
+          <div class="card-head">
+            <h2 class="card-title">Mentions Over Time</h2>
+            <span class="select-pill">Last 30 Days <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></span>
+          </div>
+          <div class="chart-legend">
+            <span><i class="legend-dot" style="background:#8b5cff;"></i>Total Mentions</span>
+            <span><i class="legend-dot" style="background:#ff2d45;"></i>High Risk Mentions</span>
+            <span><i class="legend-dot" style="background:#ff9b25;"></i>Data Breach Mentions</span>
+          </div>
+          <div class="line-chart" aria-label="Mentions trend chart">
+            <span class="chart-axis axis-left" style="top:0;">1K</span>
+            <span class="chart-axis axis-left" style="top:33%;">750</span>
+            <span class="chart-axis axis-left" style="top:66%;">250</span>
+            <span class="chart-axis axis-bottom" style="left:8%;">Apr 15</span>
+            <span class="chart-axis axis-bottom" style="left:28%;">Apr 25</span>
+            <span class="chart-axis axis-bottom" style="left:50%;">Apr 30</span>
+            <span class="chart-axis axis-bottom" style="left:70%;">May 5</span>
+            <span class="chart-axis axis-bottom" style="left:92%;">May 15</span>
+            <svg viewBox="0 0 700 205" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,150 25,132 48,143 70,120 95,110 125,105 150,95 180,102 205,101 230,89 255,92 280,78 305,68 330,66 355,73 382,85 405,80 430,69 455,62 480,65 505,78 530,70 555,75 580,63 605,78 630,72 655,80 680,72 700,66" fill="none" stroke="#8b5cff" stroke-width="3"/>
+              <polyline points="0,182 28,170 55,165 82,150 110,145 140,130 170,136 200,132 230,121 260,124 290,112 320,104 350,112 380,120 410,112 440,104 470,108 500,119 530,112 560,105 590,101 620,113 650,112 680,106 700,101" fill="none" stroke="#ff2d45" stroke-width="2"/>
+              <polyline points="0,195 30,188 60,184 90,175 120,168 150,166 180,170 210,162 240,155 270,152 300,148 330,150 360,158 390,154 420,148 450,145 480,151 510,157 540,154 570,149 600,152 630,150 660,149 700,147" fill="none" stroke="#ff9b25" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+
+        <article class="dash-card">
+          <div class="card-head">
+            <h2 class="card-title">Mentions by Severity</h2>
+            <span class="select-pill">Last 30 Days <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut"><div class="donut-center"><span><strong>3,248</strong>Total</span></div></div>
+            <ul class="legend-list">
+              <li class="legend-item"><span class="legend-swatch" style="background:#ff2d2d;"></span><span>Critical</span><b>256 (7.9%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#ff8a00;"></span><span>High</span><b>876 (27.0%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#ffc31b;"></span><span>Medium</span><b>1,248 (38.4%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#2b8cff;"></span><span>Low</span><b>612 (18.8%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#2655b8;"></span><span>Informational</span><b>256 (7.9%)</b></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="dash-card">
+          <div class="card-head">
+            <h2 class="card-title">Mentions by Source Type</h2>
+            <span class="select-pill">Last 30 Days <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut source"><div class="donut-center"><span><strong>3,248</strong>Total</span></div></div>
+            <ul class="legend-list">
+              <li class="legend-item"><span class="legend-swatch" style="background:#764cff;"></span><span>Forums</span><b>1,356 (41.7%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#2d85ff;"></span><span>Marketplaces</span><b>986 (30.3%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#15bb62;"></span><span>Telegram</span><b>542 (16.7%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#ff9b25;"></span><span>Paste Sites</span><b>268 (8.2%)</b></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#768094;"></span><span>Other</span><b>96 (2.9%)</b></li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="dash-card wide-card">
+          <div class="card-head">
+            <h2 class="card-title">Recent Dark Web Mentions</h2>
+            <div class="table-tools">
+              <span class="select-pill mini-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search mentions, keywords, domains...</span>
+              <span class="select-pill">All Severities</span>
+              <span class="select-pill">All Sources</span>
+              <span class="select-pill">All Types</span>
+              <span class="ghost-btn">Export</span>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Mention Title</th><th>Severity</th><th>Source</th><th>Type</th><th>Keyword / Data</th><th>Detected At</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><div class="mention-title"><span class="mini-icon" style="color:#ff2d45;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span>Database leaked on hacker forum<small>Byte Corp customer database</small></span></div></td><td><span class="tag critical">Critical</span></td><td>Exploit Forum</td><td>Database</td><td>acme.com</td><td>May 15, 2025 10:24 AM</td><td><button class="kebab">...</button></td></tr>
+                <tr><td><div class="mention-title"><span class="mini-icon" style="color:#ff9b25;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span>Employee credentials for sale<small>Company email: john@acme.com</small></span></div></td><td><span class="tag high">High</span></td><td>Dark Market</td><td>Credentials</td><td>john@acme.com</td><td>May 15, 2025 09:58 AM</td><td><button class="kebab">...</button></td></tr>
+                <tr><td><div class="mention-title"><span class="mini-icon" style="color:#ffc31b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span>API keys exposed in paste<small>AWS API keys in public paste</small></span></div></td><td><span class="tag medium">Medium</span></td><td>Paste Site</td><td>API Key</td><td>AKIA************</td><td>May 15, 2025 09:32 AM</td><td><button class="kebab">...</button></td></tr>
+                <tr><td><div class="mention-title"><span class="mini-icon" style="color:#ff9b25;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span>Credit card details leaked<small>Possible cards from acme.com</small></span></div></td><td><span class="tag high">High</span></td><td>Dark Market</td><td>Payment Data</td><td>**** **** **** 1234</td><td>May 15, 2025 08:47 AM</td><td><button class="kebab">...</button></td></tr>
+                <tr><td><div class="mention-title"><span class="mini-icon" style="color:#ffc31b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span>Source code repository leaked<small>Private repo with internal code</small></span></div></td><td><span class="tag medium">Medium</span></td><td>Exploit Forum</td><td>Source Code</td><td>acme-internal-repo</td><td>May 15, 2025 07:21 AM</td><td><button class="kebab">...</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span>Showing 1 to 5 of 3,248 mentions</span>
+            <div class="pages"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">...</span><span class="page-btn">650</span><span class="page-btn">›</span></div>
+            <span class="select-pill">5 / page</span>
+          </div>
+        </article>
+
+        <article class="dash-card exposed-card">
+          <div class="card-head">
+            <h2 class="card-title">Top Exposed Data Types</h2>
+            <a class="link-btn" href="#">View All</a>
+          </div>
+          <div class="bar-list">
+            <div class="bar-row"><span>Credentials</span><span class="bar-track"><i class="bar-fill" style="width:78%;"></i></span><b>1,248 (38.4%)</b></div>
+            <div class="bar-row"><span>Email Addresses</span><span class="bar-track"><i class="bar-fill" style="width:65%;"></i></span><b>986 (30.3%)</b></div>
+            <div class="bar-row"><span>Payment Data</span><span class="bar-track"><i class="bar-fill" style="width:37%;"></i></span><b>542 (16.7%)</b></div>
+            <div class="bar-row"><span>Phone Numbers</span><span class="bar-track"><i class="bar-fill" style="width:18%;"></i></span><b>268 (8.2%)</b></div>
+            <div class="bar-row"><span>API Keys</span><span class="bar-track"><i class="bar-fill" style="width:10%;"></i></span><b>142 (4.4%)</b></div>
+            <div class="bar-row"><span>Source Code</span><span class="bar-track"><i class="bar-fill" style="width:5%;"></i></span><b>62 (1.9%)</b></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid lower">
+        <article class="dash-card">
+          <div class="card-head"><h2 class="card-title">Top Keywords / Entities</h2><a class="link-btn" href="#">View All</a></div>
+          <table class="simple-table">
+            <thead><tr><th>Keyword / Entity</th><th>Mentions</th><th>Change</th></tr></thead>
+            <tbody>
+              <tr><td>acme.com</td><td>512</td><td class="change-up">↑ 22.1%</td></tr>
+              <tr><td>acme</td><td>412</td><td class="change-up">↑ 18.7%</td></tr>
+              <tr><td>john@acme.com</td><td>256</td><td class="change-up">↑ 15.3%</td></tr>
+              <tr><td>acme-internal</td><td>198</td><td class="change-up">↑ 11.4%</td></tr>
+              <tr><td>api.acme.com</td><td>142</td><td class="change-up">↑ 9.2%</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="dash-card">
+          <div class="card-head"><h2 class="card-title">Monitored Sources</h2><a class="link-btn" href="#">View All</a></div>
+          <table class="simple-table">
+            <thead><tr><th>Source</th><th>Type</th><th>Mentions</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>BreachForums</td><td>Forum</td><td>856</td><td><span class="tag active">Active</span></td></tr>
+              <tr><td>Genesis Market</td><td>Marketplace</td><td>512</td><td><span class="tag active">Active</span></td></tr>
+              <tr><td>Telegram (Private)</td><td>Telegram</td><td>412</td><td><span class="tag active">Active</span></td></tr>
+              <tr><td>PasteBin</td><td>Paste Site</td><td>268</td><td><span class="tag active">Active</span></td></tr>
+              <tr><td>RaidForums</td><td>Forum</td><td>142</td><td><span class="tag active">Active</span></td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="dash-card">
+          <div class="card-head"><h2 class="card-title">Dark Web Alerts</h2><a class="link-btn" href="#">View All</a></div>
+          <ul class="alert-list">
+            <li class="alert-row"><span class="mini-icon" style="color:#ff2d45;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span class="alert-copy">Critical credential leak detected<small>Multiple credentials found for acme.com</small></span><span>10 min ago</span><span class="tag critical">Critical</span></li>
+            <li class="alert-row"><span class="mini-icon" style="color:#ff9b25;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span class="alert-copy">New database sale listing<small>Potential acme.com customer data</small></span><span>45 min ago</span><span class="tag high">High</span></li>
+            <li class="alert-row"><span class="mini-icon" style="color:#ffc31b;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span class="alert-copy">API key exposed<small>AWS API key found in public paste</small></span><span>1 hr ago</span><span class="tag medium">Medium</span></li>
+            <li class="alert-row"><span class="mini-icon" style="color:#2d85ff;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></span><span class="alert-copy">New mention detected<small>acme-internal mentioned in forum</small></span><span>2 hr ago</span><span class="tag low">Low</span></li>
+          </ul>
+        </article>
+      </section>
+
+      <footer class="footer-bar">
+        <span>© 2025 BreachRadar. All rights reserved.</span>
+        <nav class="footer-links" aria-label="Footer links">
+          <span>Help Center</span><span>Documentation</span><span>API Docs</span><span>Status Page</span><span>Privacy Policy</span><span>Terms of Service</span>
+        </nav>
+        <span class="select-pill">English</span>
+      </footer>
+    </main>
+
+  
+  </div>
+
+    <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const currentPage = decodeURIComponent(window.location.pathname.split("/").pop()) || "overview.html";
+
+        navLinks.forEach((link) => {
+            const linkPage = link.dataset.page || decodeURIComponent(link.getAttribute("href") || "");
+            link.classList.toggle("active", linkPage === currentPage);
+
+            link.addEventListener("click", () => {
+                navLinks.forEach((item) => item.classList.remove("active"));
+                link.classList.add("active");
+            });
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1829 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BreachRadar Sidebar</title>
+    <style>
+        :root {
+            --bg: #020812;
+            --panel: #030b18;
+            --panel-soft: #071325;
+            --line: rgba(118, 134, 168, 0.13);
+            --text: #f4f7ff;
+            --muted: #9ba7bd;
+            --muted-soft: #68738a;
+            --primary: #6f4dff;
+            --primary-2: #9d6bff;
+            --active: #20154f;
+            --active-border: rgba(135, 98, 255, 0.52);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #06101f;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.16), transparent 28rem),
+                linear-gradient(135deg, #020812 0%, #071322 52%, #050a14 100%);
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 242px;
+            min-height: 100vh;
+            padding: 17px 13px 15px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #020812 0%, #030b18 56%, #020814 100%);
+            border-right: 1px solid rgba(104, 125, 163, 0.16);
+            box-shadow: 14px 0 42px rgba(0, 0, 0, 0.28);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 17px;
+            padding: 0 4px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            color: white;
+            border-radius: 9px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 42%),
+                linear-gradient(160deg, #8d6aff 0%, #562dff 48%, #25115f 100%);
+            box-shadow: 0 10px 22px rgba(91, 54, 255, 0.33);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .brand-title span {
+            color: #815cff;
+        }
+
+        .brand-subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nav-scroll {
+            overflow: auto;
+            padding-right: 2px;
+            scrollbar-width: none;
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .nav-section:first-child {
+            padding-top: 0;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 5px 9px;
+            color: var(--muted-soft);
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 9px;
+            color: #d8deeb;
+            text-decoration: none;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.045);
+            outline: none;
+        }
+
+        .nav-link.active,
+        .nav-link.active:hover,
+        .nav-link.active:focus-visible {
+            color: white;
+            background: linear-gradient(90deg, #221560 0%, #1b1249 100%);
+            border-color: var(--active-border);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .icon {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 15px;
+            color: currentColor;
+            stroke-width: 2;
+        }
+
+        .badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border-radius: 99px;
+            color: #e9e3ff;
+            background: #25145d;
+            border: 1px solid rgba(142, 104, 255, 0.37);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .help-card {
+            margin-top: 16px;
+            padding: 13px;
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(37, 20, 93, 0.72), rgba(20, 19, 55, 0.78)),
+                #0b1227;
+            border: 1px solid rgba(128, 97, 255, 0.22);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .help-text {
+            margin: 0 0 12px;
+            color: #a9b1c7;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 400;
+        }
+
+        .support-btn {
+            width: 100%;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: white;
+            background: linear-gradient(180deg, #2f1c74, #25145d);
+            border: 1px solid rgba(145, 112, 255, 0.32);
+            border-radius: 7px;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+    .content-placeholder {
+      margin-left: 242px;
+      min-height: 100vh;
+      padding-top: 72px;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 242px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 20px;
+      background: linear-gradient(180deg, rgba(2, 8, 18, 0.98), rgba(3, 11, 24, 0.94));
+      border-bottom: 1px solid rgba(104, 125, 163, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+      z-index: 5;
+    }
+
+    .welcome {
+      min-width: 235px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      color: #dfe7ff;
+      background: #101a2d;
+      border: 1px solid rgba(160, 176, 211, 0.32);
+    }
+
+    .welcome-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .star-badge {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(160deg, #8d6aff, #512cff);
+    }
+
+    .welcome-copy {
+      margin: 2px 0 0;
+      color: #9ba7bd;
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-box {
+      width: clamp(180px, 23vw, 320px);
+      min-width: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px 0 13px;
+      color: #aeb8cc;
+      background: #071225;
+      border: 1px solid rgba(122, 139, 174, 0.18);
+      border-radius: 7px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      color: #d9e0ee;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .search-box input::placeholder {
+      color: #7f8ba2;
+    }
+
+    .shortcut {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 5px;
+      color: #b7c0d4;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(137, 154, 190, 0.14);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .create-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 1px solid rgba(151, 116, 255, 0.36);
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(180deg, #6a49ff, #4f2cd4);
+      box-shadow: 0 12px 28px rgba(84, 49, 215, 0.32);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-icon-btn {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      color: #c8d1e4;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .top-icon-btn:hover,
+    .top-icon-btn:focus-visible {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #ff2d5e;
+      border: 2px solid #030b18;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+      min-width: 178px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      overflow: hidden;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 30%, #ffe3cb 0 22%, transparent 23%),
+        linear-gradient(135deg, #f5c7a8 0 44%, #2f5c8f 45% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .profile-name {
+      margin: 0;
+      color: white;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .profile-email {
+      margin: 2px 0 0;
+      color: #8d98ad;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 400;
+      max-width: 138px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .time-line {
+      position: absolute;
+      right: 24px;
+      bottom: 7px;
+      margin: 0;
+      color: #7e8aa0;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .dashboard {
+      margin-left: 242px;
+      width: calc(100% - 242px);
+      min-height: 100vh;
+      padding: 88px 22px 28px;
+      overflow-x: clip;
+    }
+
+
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .stat-card,
+    .panel,
+    .quick-action {
+      min-width: 0;
+      background:
+        radial-gradient(circle at 0 0, rgba(111, 77, 255, 0.08), transparent 18rem),
+        linear-gradient(180deg, rgba(7, 19, 37, 0.96), rgba(2, 8, 18, 0.96));
+      border: 1px solid rgba(80, 103, 151, 0.22);
+      border-radius: 8px;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    }
+
+    .stat-card {
+      grid-column: span 4;
+      min-height: 118px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      overflow: hidden;
+    }
+
+    .stat-card > div:last-child {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .stat-icon,
+    .activity-icon,
+    .tool-icon,
+    .request-avatar,
+    .quick-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 999px;
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      color: var(--primary-2);
+      background: radial-gradient(circle, rgba(111, 77, 255, 0.42), rgba(54, 29, 130, 0.7));
+    }
+
+    .stat-icon.green { color: #14dd83; background: radial-gradient(circle, rgba(7, 161, 104, 0.34), rgba(3, 48, 50, 0.74)); }
+    .stat-icon.blue { color: #00a8ff; background: radial-gradient(circle, rgba(0, 145, 255, 0.25), rgba(5, 35, 77, 0.75)); }
+    .stat-icon.orange { color: #ff9a16; background: radial-gradient(circle, rgba(255, 145, 19, 0.25), rgba(74, 39, 4, 0.74)); }
+
+    .stat-label {
+      margin: 0 0 7px;
+      color: #e7ecf8;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .stat-value {
+      color: #fff;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .trend {
+      color: #00d677;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .stat-note {
+      margin: 8px 0 0;
+      color: #8c97aa;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .panel {
+      padding: 18px 20px;
+      overflow: hidden;
+      min-height: 100%;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+      min-width: 0;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      margin: 0;
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 700;
+      flex-wrap: wrap;
+    }
+
+    .count-pill,
+    .panel-btn,
+    .period-select {
+      border: 1px solid rgba(129, 78, 255, 0.34);
+      background: rgba(39, 18, 88, 0.62);
+      color: #c982ff;
+      border-radius: 7px;
+    }
+
+    .count-pill {
+      min-width: 26px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      font-size: 11px;
+    }
+
+    .panel-btn {
+      flex: 0 0 auto;
+      min-width: 76px;
+      height: 31px;
+      padding: 0 13px;
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .period-select {
+      height: 32px;
+      min-width: 102px;
+      padding: 0 12px;
+      color: #bcc6d9;
+      background: rgba(9, 18, 36, 0.9);
+      border-color: rgba(91, 111, 151, 0.28);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .requests-panel {
+      grid-column: span 12;
+    }
+
+    .overview-panel {
+      grid-column: span 6;
+      min-height: 270px;
+      padding: 18px 20px 28px;
+      background:
+        radial-gradient(circle at 15% 30%, rgba(34, 77, 170, 0.12), transparent 17rem),
+        linear-gradient(180deg, rgba(3, 12, 27, 0.98), rgba(2, 8, 18, 0.98));
+      border-color: rgba(41, 74, 130, 0.36);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .overview-panel .panel-header {
+      margin-bottom: 26px;
+    }
+
+    .overview-panel .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .overview-panel .panel-btn {
+      min-width: 98px;
+      height: 32px;
+      color: #bd75ff;
+      background: rgba(25, 13, 62, 0.82);
+      border-color: rgba(89, 49, 181, 0.5);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .side-panel,
+    .tools-panel,
+    .chart-panel {
+      grid-column: span 6;
+    }
+
+    .activity-panel {
+      grid-column: span 12;
+    }
+
+    .quick-panel {
+      grid-column: span 12;
+    }
+
+    .requests-table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .requests-table th {
+      padding: 0 8px 12px;
+      color: #8995aa;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .requests-table td {
+      height: 47px;
+      padding: 0 8px;
+      color: #dce3f1;
+      border-top: 1px solid rgba(99, 117, 151, 0.14);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .table-scroll {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .request-avatar {
+      width: 29px;
+      height: 29px;
+      color: #d9c7ff;
+      background: #25145d;
+      font-size: 10px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 10px;
+      color: #ff9a16;
+      background: rgba(255, 145, 19, 0.13);
+      border: 1px solid rgba(255, 145, 19, 0.22);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-action {
+      width: 28px;
+      height: 29px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      border: 1px solid rgba(93, 112, 148, 0.22);
+      color: #9ca8bf;
+      background: rgba(12, 23, 45, 0.88);
+    }
+
+    .mini-action.approve { color: #00d677; background: rgba(0, 214, 119, 0.08); border-color: rgba(0, 214, 119, 0.2); }
+    .mini-action.reject { color: #ff4a4a; background: rgba(255, 74, 74, 0.08); border-color: rgba(255, 74, 74, 0.22); }
+
+    .center-action {
+      display: flex;
+      justify-content: center;
+      padding-top: 14px;
+    }
+
+    .wide-btn {
+      width: 180px;
+      height: 33px;
+      border: 1px solid rgba(148, 78, 255, 0.42);
+      border-radius: 6px;
+      color: #c56cff;
+      background: rgba(19, 13, 43, 0.66);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .donut-layout {
+      display: grid;
+      grid-template-columns: minmax(182px, 208px) minmax(220px, 1fr);
+      gap: 26px;
+      align-items: center;
+      padding-left: 26px;
+    }
+
+    .donut {
+      position: relative;
+      width: min(182px, 100%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: conic-gradient(#14b86d 0 78.5%, #ff9b1a 78.5% 86.1%, #ff3e48 86.1% 95.9%, #3935e6 95.9% 100%);
+      box-shadow: 0 0 36px rgba(20, 184, 109, 0.18);
+    }
+
+    .donut::before {
+      content: "";
+      position: absolute;
+      inset: 55px;
+      border-radius: inherit;
+      background: #050c18;
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .donut-number {
+      color: #fff;
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .donut-caption {
+      margin-top: 5px;
+      color: #a9b3c8;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+
+    .legend-list,
+    .subscription-list,
+    .tool-list,
+    .activity-list {
+      min-width: 0;
+      display: grid;
+      gap: 18px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .overview-panel .legend-list {
+      gap: 23px;
+    }
+
+    .legend-item,
+    .subscription-row,
+    .activity-row {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #dce3f1;
+      font-size: 12px;
+    }
+
+    .overview-panel .legend-item {
+      color: #dfe6f4;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .legend-name {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .legend-item > span:last-child {
+      min-width: 112px;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .legend-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 4px;
+      background: #14b86d;
+    }
+
+    .legend-dot.orange { background: #ff9b1a; }
+    .legend-dot.red { background: #ff3e48; }
+    .legend-dot.blue { background: #3935e6; }
+
+    .subscription-list {
+      gap: 0;
+    }
+
+    .subscription-row {
+      min-height: 35px;
+      border-bottom: 1px solid rgba(99, 117, 151, 0.12);
+    }
+
+    .subscription-row:last-child {
+      border-bottom: 0;
+    }
+
+    .subscription-value {
+      margin-left: auto;
+      color: #eaf0fb;
+      font-weight: 700;
+    }
+
+    .chart-wrap {
+      height: 190px;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 9px;
+      color: #c8a0ff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .legend-mini-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8e43ff;
+    }
+
+    .tool-list {
+      gap: 15px;
+    }
+
+    .tool-row {
+      display: grid;
+      grid-template-columns: 25px minmax(0, 1fr) 46px;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .tool-icon {
+      width: 23px;
+      height: 23px;
+      color: #d2b7ff;
+      background: rgba(111, 77, 255, 0.12);
+      border: 1px solid rgba(129, 78, 255, 0.18);
+    }
+
+    .tool-name {
+      margin: 0 0 7px;
+      color: #e5ebf7;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .bar {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #16233a;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6b35ff, #bd3cff);
+    }
+
+    .tool-value {
+      color: #e3e9f6;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 19px;
+    }
+
+    .quick-action {
+      min-height: 80px;
+      padding: 12px 8px 10px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 8px;
+      color: #dce3f1;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .quick-icon {
+      width: 37px;
+      height: 37px;
+      color: #b36cff;
+      background: rgba(111, 77, 255, 0.18);
+    }
+
+    .activity-list {
+      gap: 0;
+    }
+
+    .activity-row {
+      min-height: 66px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 0 0 13px;
+      margin-bottom: 13px;
+      border-bottom: 1px solid rgba(99, 117, 151, 0.12);
+    }
+
+    .activity-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .activity-icon {
+      width: 39px;
+      height: 39px;
+      color: #00d677;
+      background: rgba(0, 214, 119, 0.12);
+    }
+
+    .activity-icon.purple { color: #8e43ff; background: rgba(111, 77, 255, 0.18); }
+    .activity-icon.blue { color: #00a8ff; background: rgba(0, 145, 255, 0.14); }
+    .activity-icon.orange { color: #ff9a16; background: rgba(255, 145, 19, 0.13); }
+
+    .activity-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .activity-title {
+      margin: 0 0 6px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .activity-meta {
+      margin: 0;
+      color: #9ba7bd;
+      font-size: 11px;
+    }
+
+    .activity-time {
+      color: #9aa5b8;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 560px) {
+      .sidebar {
+        width: 100%;
+                max-width: 280px;
+            }
+
+      .content-placeholder {
+        margin-left: 0;
+        padding-top: 0;
+      }
+
+      .topbar {
+        left: 0;
+        top: auto;
+        bottom: 0;
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .search-box,
+      .welcome,
+      .profile {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .top-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .time-line {
+        position: static;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 1180px) {
+
+
+
+
+      .stat-card,
+      .overview-panel,
+      .side-panel,
+      .activity-panel,
+      .chart-panel,
+      .tools-panel,
+      .quick-panel,
+      .requests-panel {
+        grid-column: span 6;
+      }
+
+      .requests-panel,
+      .overview-panel,
+      .quick-panel,
+      .activity-panel {
+        grid-column: span 12;
+      }
+
+      .stat-card {
+        min-height: 112px;
+        padding: 18px 20px;
+      }
+
+      .stat-value {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .dashboard {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px 14px 140px;
+      }
+
+      .stat-card,
+      .overview-panel,
+      .side-panel,
+      .activity-panel,
+      .chart-panel,
+      .tools-panel,
+      .quick-panel,
+      .requests-panel {
+        grid-column: span 12;
+      }
+
+      .donut-layout {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding-left: 0;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="BreachRadar navigation">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 3 5 6v5c0 4.4 2.8 8.4 7 10 4.2-1.6 7-5.6 7-10V6l-7-3Z" />
+                        <path d="m9 12 2 2 4-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Breach<span>Radar</span></h1>
+                    <p class="brand-subtitle">SUPER ADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-scroll">
+                    <section class="nav-section" aria-label="Overview">
+                        <ul class="nav-list">
+                            <li>
+                                <a class="nav-link" href="overview.html" data-page="overview.html">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="m3 11 9-8 9 8" />
+                                        <path d="M5 10v10h14V10" />
+                                        <path d="M9 20v-6h6v6" />
+                                    </svg>
+                                    Overview
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="manage-title">
+                        <h2 class="section-heading" id="manage-title">
+                            Manage
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                style="width: 10px; height: 10px;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user&team.html" data-page="user&team.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>Users &amp; Teams</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 7l9 6 9-6" />
+                                    </svg>Subscriptions</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 21h18" />
+                                        <path d="M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-7h6v7" />
+                                    </svg>Organizations</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <path d="M12 15v2" />
+                                    </svg>Roles &amp; Permissions</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M10 13a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 4.9" />
+                                        <path d="M14 11a5 5 0 0 0-7.1 0l-2.4 2.4a5 5 0 0 0 7.1 7.1L13 19.1" />
+                                    </svg>API Access</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>Audit Logs <span class="badge">New</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                                    </svg>Announcements</a></li>
+                        </ul>
+                    </section>
+
+
+
+   <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">OSINT</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="osint-dashboard.html" data-page="osint-dashboard.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="user-management.html" data-page="user-management.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>User Management <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="varification-request.html" data-page="varification-request.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Verification Requests <span class="badge">5</span></a></li>
+                            <li><a class="nav-link" href="osint-intelligence.html" data-page="osint-intelligence.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>OSINT Intelligence</a></li>
+                            
+                        </ul>
+                    </section>
+
+
+                    <section class="nav-section" aria-labelledby="monitor-title">
+                        <h2 class="section-heading" id="monitor-title">Monitor</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="user-management.html" data-page="user-management.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M3 9h18" />
+                                        <path d="M9 21V9" />
+                                    </svg>Dashboard</a></li>
+                            <li><a class="nav-link" href="varification-request.html" data-page="varification-request.html"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path
+                                            d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>Threats &amp; Alerts <span class="badge">12</span></a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                        <path d="M11 7v4l3 2" />
+                                    </svg>Scans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+                                    </svg>Dark Web Monitoring</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 14l3-3 3 2 5-6" />
+                                        <path d="M18 7h-4" />
+                                    </svg>Reports</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="configure-title">
+                        <h2 class="section-heading" id="configure-title">Configure</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 20v-6" />
+                                        <path d="M6 20V10" />
+                                        <path d="M18 20V4" />
+                                        <path d="M4 14h4" />
+                                        <path d="M10 14h4" />
+                                        <path d="M16 8h4" />
+                                    </svg>Integrations</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+                                        <path
+                                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+                                    </svg>Settings</a></li>
+                        </ul>
+                    </section>
+
+                    <section class="nav-section" aria-labelledby="system-title">
+                        <h2 class="section-heading" id="system-title">System</h2>
+                        <ul class="nav-list">
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                                        <path d="M3 10h18" />
+                                        <path d="M7 15h2" />
+                                    </svg>Billing &amp; Plans</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                                        <path d="m9 12 2 2 4-5" />
+                                    </svg>System Health</a></li>
+                            <li><a class="nav-link" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor">
+                                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                        <path d="M8 9h8" />
+                                        <path d="M8 13h5" />
+                                    </svg>Support Tickets</a></li>
+                        </ul>
+                    </section>
+                </div>
+
+                <div class="help-card">
+                    <h2 class="help-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Need Help?
+                    </h2>
+                    <p class="help-text">Our support team is here 24/7</p>
+                    <button class="support-btn" type="button">
+                        Contact Support
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            style="width: 13px; height: 13px;">
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+    </aside>
+
+    <header class="topbar" aria-label="Top navigation">
+      <div class="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2 5 5v6c0 5 3 9 7 11 4-2 7-6 7-11V5l-7-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="welcome-title">
+            Welcome back, Super Admin
+            <span class="star-badge" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 10px; height: 10px;">
+                <path d="m12 2 2.8 6.2 6.7.8-5 4.5 1.3 6.5-5.8-3.4L6.2 20l1.3-6.5-5-4.5 6.7-.8L12 2Z" />
+              </svg>
+            </span>
+          </h2>
+          <p class="welcome-copy">Here's what's happening across your platform today.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <label class="search-box" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="search" placeholder="Search anything..." />
+          <span class="shortcut">Ctrl /</span>
+        </label>
+
+        <button class="create-btn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          Create New
+        </button>
+
+        <div class="icon-row" aria-label="Quick actions">
+          <button class="top-icon-btn" type="button" aria-label="Notifications">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 1 1 5.8 1c-.7 1.4-2.9 1.7-2.9 3.5" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="System settings">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3h.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1A1.7 1.7 0 0 0 21 10h0a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z" />
+            </svg>
+          </button>
+          <button class="top-icon-btn" type="button" aria-label="Dark mode">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <p class="profile-name">Super Admin</p>
+            <p class="profile-email">superadmin@breachradar.com</p>
+          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
+
+    </header>
+
+    <main class="dashboard" aria-label="Super admin dashboard">
+      <section class="dashboard-grid">
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 25px; height: 25px;">
+              <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 8a8 8 0 0 1 16 0v1H4v-1Z" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Total Users</p>
+            <div class="stat-value-row">
+              <span class="stat-value">8,432</span>
+              <span class="trend">^ 16.3%</span>
+            </div>
+            <p class="stat-note">vs last month</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="width: 25px; height: 25px;">
+              <path d="M12 2 4 5.5v6.3c0 5 3.2 9.4 8 10.2 4.8-.8 8-5.2 8-10.2V5.5L12 2Zm3.8 8.1-4.5 4.5-2.7-2.7 1.3-1.3 1.4 1.4 3.2-3.2 1.3 1.3Z" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">LEW Verified Users</p>
+            <div class="stat-value-row">
+              <span class="stat-value">1,248</span>
+              <span class="trend">^ 22.5%</span>
+            </div>
+            <p class="stat-note">vs last month</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon orange" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 25px; height: 25px;">
+              <path d="M7 3h10" />
+              <path d="M7 21h10" />
+              <path d="M8 3c0 4 3 5 4 7 1-2 4-3 4-7" />
+              <path d="M8 21c0-4 3-5 4-7 1 2 4 3 4 7" />
+              <path d="M12 10v4" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Pending Verifications</p>
+            <div class="stat-value-row"><span class="stat-value">12</span></div>
+            <p class="stat-note">vs last month</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon blue" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 25px; height: 25px;">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="M3 10h18" />
+              <path d="M7 15h5" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Active Subscriptions</p>
+            <div class="stat-value-row">
+              <span class="stat-value">342</span>
+              <span class="trend">^ 18.7%</span>
+            </div>
+            <p class="stat-note">vs last month</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 25px; height: 25px;">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m16.5 16.5 4 4" />
+              <circle cx="11" cy="11" r="3" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Total Investigations</p>
+            <div class="stat-value-row">
+              <span class="stat-value">15,892</span>
+              <span class="trend">^ 25.4%</span>
+            </div>
+            <p class="stat-note">vs last month</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon green" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 25px; height: 25px;">
+              <path d="M3 12h4l2-6 4 13 3-9 2 2h3" />
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">System Health</p>
+            <div class="stat-value-row"><span class="stat-value">100%</span></div>
+            <p class="stat-note">All Systems Healthy</p>
+          </div>
+        </article>
+
+        <article class="panel requests-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Pending Verification Requests <span class="count-pill">12</span></h2>
+            <button class="panel-btn" type="button">View All</button>
+          </div>
+          <div class="table-scroll">
+            <table class="requests-table">
+              <thead>
+                <tr>
+                  <th style="width: 16%;">User Name</th>
+                  <th style="width: 21%;">Email</th>
+                  <th style="width: 23%;">Organization</th>
+                  <th style="width: 16%;">Requested On</th>
+                  <th style="width: 11%;">Status</th>
+                  <th style="width: 13%;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="user-cell"><span class="request-avatar">RV</span>Rahul Verma</div></td>
+                  <td>rahul.verma@gov.in</td>
+                  <td>Delhi Police Cyber Cell</td>
+                  <td>20 May 2025</td>
+                  <td><span class="status-pill">Pending</span></td>
+                  <td><div class="row-actions"><span class="mini-action">&#9673;</span><span class="mini-action approve">&#10003;</span><span class="mini-action reject">X</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-cell"><span class="request-avatar">SI</span>Sneha Iyer</div></td>
+                  <td>sneha.iyer@nic.in</td>
+                  <td>CERT-In</td>
+                  <td>20 May 2025</td>
+                  <td><span class="status-pill">Pending</span></td>
+                  <td><div class="row-actions"><span class="mini-action">&#9673;</span><span class="mini-action approve">&#10003;</span><span class="mini-action reject">X</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-cell"><span class="request-avatar">AS</span>Arjun Singh</div></td>
+                  <td>arjun.singh@mha.gov.in</td>
+                  <td>Ministry of Home Affairs</td>
+                  <td>19 May 2025</td>
+                  <td><span class="status-pill">Pending</span></td>
+                  <td><div class="row-actions"><span class="mini-action">&#9673;</span><span class="mini-action approve">&#10003;</span><span class="mini-action reject">X</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-cell"><span class="request-avatar">VP</span>Vikram Patel</div></td>
+                  <td>vikram.patel@police.gov.in</td>
+                  <td>Gujarat Police Cyber Cell</td>
+                  <td>19 May 2025</td>
+                  <td><span class="status-pill">Pending</span></td>
+                  <td><div class="row-actions"><span class="mini-action">&#9673;</span><span class="mini-action approve">&#10003;</span><span class="mini-action reject">X</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-cell"><span class="request-avatar">NS</span>Neha Sharma</div></td>
+                  <td>neha.sharma@cert.gov.in</td>
+                  <td>State CERT Team</td>
+                  <td>18 May 2025</td>
+                  <td><span class="status-pill">Pending</span></td>
+                  <td><div class="row-actions"><span class="mini-action">&#9673;</span><span class="mini-action approve">&#10003;</span><span class="mini-action reject">X</span></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="center-action"><button class="wide-btn" type="button">View All Requests</button></div>
+        </article>
+
+        <article class="panel overview-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">LEW Verification Overview</h2>
+            <button class="panel-btn" type="button">View Report</button>
+          </div>
+          <div class="donut-layout">
+            <div class="donut" aria-label="LEW verification donut chart">
+              <div class="donut-center">
+                <span class="donut-number">1,248</span>
+                <span class="donut-caption">Total Verified</span>
+              </div>
+            </div>
+            <ul class="legend-list">
+              <li class="legend-item"><span class="legend-name"><span class="legend-dot"></span>Approved</span><span>1,248 (78.5%)</span></li>
+              <li class="legend-item"><span class="legend-name"><span class="legend-dot orange"></span>Pending</span><span>12 (7.6%)</span></li>
+              <li class="legend-item"><span class="legend-name"><span class="legend-dot red"></span>Rejected</span><span>156 (9.8%)</span></li>
+              <li class="legend-item"><span class="legend-name"><span class="legend-dot blue"></span>Expired</span><span>172 (10.9%)</span></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">OSINT Usage Overview</h2>
+            <button class="period-select" type="button">This Month v</button>
+          </div>
+          <div class="chart-wrap">
+            <svg class="chart-svg" viewBox="0 0 520 190" role="img" aria-label="Investigations line chart">
+              <defs>
+                <linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#8d3cff" stop-opacity="0.62" />
+                  <stop offset="1" stop-color="#8d3cff" stop-opacity="0.08" />
+                </linearGradient>
+                <filter id="lineGlow" x="-10%" y="-20%" width="120%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <g stroke="rgba(129,148,183,0.11)" stroke-width="1">
+                <path d="M36 14H500M36 52H500M36 90H500M36 128H500M36 166H500" />
+                <path d="M36 14V166M112 14V166M188 14V166M264 14V166M340 14V166M416 14V166M500 14V166" />
+              </g>
+              <g fill="#9ba7bd" font-size="11">
+                <text x="10" y="169">0</text><text x="10" y="131">1K</text><text x="10" y="93">2K</text><text x="10" y="55">3K</text><text x="10" y="17">5K</text>
+                <text x="28" y="186">1 May</text><text x="105" y="186">5 May</text><text x="178" y="186">10 May</text><text x="254" y="186">15 May</text><text x="334" y="186">20 May</text><text x="413" y="186">25 May</text><text x="478" y="186">31 May</text>
+              </g>
+              <path d="M36 128 L62 112 L88 102 L114 92 L140 75 L166 91 L192 72 L218 50 L244 60 L270 36 L296 68 L322 81 L348 64 L374 58 L400 30 L426 36 L452 34 L478 16 L500 22 L500 166 L36 166 Z" fill="url(#areaFill)" />
+              <path d="M36 128 L62 112 L88 102 L114 92 L140 75 L166 91 L192 72 L218 50 L244 60 L270 36 L296 68 L322 81 L348 64 L374 58 L400 30 L426 36 L452 34 L478 16 L500 22" fill="none" stroke="#a85dff" stroke-width="3" filter="url(#lineGlow)" />
+              <g fill="#050c18" stroke="#c186ff" stroke-width="2">
+                <circle cx="36" cy="128" r="3" /><circle cx="62" cy="112" r="3" /><circle cx="88" cy="102" r="3" /><circle cx="114" cy="92" r="3" /><circle cx="140" cy="75" r="3" /><circle cx="166" cy="91" r="3" /><circle cx="192" cy="72" r="3" /><circle cx="218" cy="50" r="3" /><circle cx="244" cy="60" r="3" /><circle cx="270" cy="36" r="3" /><circle cx="296" cy="68" r="3" /><circle cx="322" cy="81" r="3" /><circle cx="348" cy="64" r="3" /><circle cx="374" cy="58" r="3" /><circle cx="400" cy="30" r="3" /><circle cx="426" cy="36" r="3" /><circle cx="452" cy="34" r="3" /><circle cx="478" cy="16" r="3" /><circle cx="500" cy="22" r="3" />
+              </g>
+            </svg>
+          </div>
+          <div class="chart-legend"><span class="legend-mini-dot"></span>Investigations</div>
+        </article>
+
+        <article class="panel tools-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Top OSINT Tools Used</h2>
+            <button class="period-select" type="button">This Month v</button>
+          </div>
+          <ul class="tool-list">
+            <li class="tool-row"><span class="tool-icon">@</span><div><p class="tool-name">Identity Intelligence</p><div class="bar"><span style="width: 74%;"></span></div></div><span class="tool-value">4,568</span></li>
+            <li class="tool-row"><span class="tool-icon">#</span><div><p class="tool-name">Dark Web Intelligence</p><div class="bar"><span style="width: 77%;"></span></div></div><span class="tool-value">3,897</span></li>
+            <li class="tool-row"><span class="tool-icon">+</span><div><p class="tool-name">Breach Correlation</p><div class="bar"><span style="width: 69%;"></span></div></div><span class="tool-value">3,204</span></li>
+            <li class="tool-row"><span class="tool-icon">*</span><div><p class="tool-name">Domain &amp; Infra Intel</p><div class="bar"><span style="width: 62%;"></span></div></div><span class="tool-value">2,764</span></li>
+            <li class="tool-row"><span class="tool-icon">?</span><div><p class="tool-name">IP &amp; Geo Intelligence</p><div class="bar"><span style="width: 56%;"></span></div></div><span class="tool-value">2,143</span></li>
+          </ul>
+          <div class="center-action"><button class="wide-btn" type="button" style="width: 100%;">View All Tools</button></div>
+        </article>
+
+        <article class="panel side-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Subscription Overview</h2>
+            <button class="panel-btn" type="button">View All</button>
+          </div>
+          <ul class="subscription-list">
+            <li class="subscription-row"><span>LEW Basic</span><span class="subscription-value">58</span><span class="trend">^ 12.3%</span></li>
+            <li class="subscription-row"><span>LEW Professional</span><span class="subscription-value">198</span><span class="trend">^ 18.6%</span></li>
+            <li class="subscription-row"><span>LEW Enterprise</span><span class="subscription-value">86</span><span class="trend">^ 16.1%</span></li>
+            <li class="subscription-row"><span>Total Revenue (May)</span><span class="subscription-value">&#8377;24,58,300</span><span class="trend">^ 20.4%</span></li>
+          </ul>
+        </article>
+
+        <article class="panel quick-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Quick Actions</h2>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-action" type="button"><span class="quick-icon">&#9787;</span>Approve Requests</button>
+            <button class="quick-action" type="button"><span class="quick-icon">&#9962;</span>Manage Users</button>
+            <button class="quick-action" type="button"><span class="quick-icon">&#9906;</span>View Investigations</button>
+            <button class="quick-action" type="button"><span class="quick-icon">&#9645;</span>Manage Subscriptions</button>
+            <button class="quick-action" type="button"><span class="quick-icon">&#9881;</span>System Settings</button>
+            <button class="quick-action" type="button"><span class="quick-icon">&#9635;</span>Audit Logs</button>
+          </div>
+        </article>
+
+        <article class="panel activity-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Recent System Activities</h2>
+            <button class="panel-btn" type="button">View All</button>
+          </div>
+          <ul class="activity-list">
+            <li class="activity-row"><span class="activity-icon">&#10003;</span><div class="activity-copy"><p class="activity-title">LEW verification approved</p><p class="activity-meta">rahul.verma@gov.in</p></div><span class="activity-time">2 min ago</span></li>
+            <li class="activity-row"><span class="activity-icon purple">&#9787;</span><div class="activity-copy"><p class="activity-title">New user registered</p><p class="activity-meta">sneha.iyer@nic.in</p></div><span class="activity-time">8 min ago</span></li>
+            <li class="activity-row"><span class="activity-icon blue">&#9645;</span><div class="activity-copy"><p class="activity-title">Subscription renewed</p><p class="activity-meta">LEW Professional Plan</p></div><span class="activity-time">15 min ago</span></li>
+            <li class="activity-row"><span class="activity-icon orange">&#8682;</span><div class="activity-copy"><p class="activity-title">Document uploaded</p><p class="activity-meta">Authorization Letter - Delhi Police</p></div><span class="activity-time">22 min ago</span></li>
+            <li class="activity-row"><span class="activity-icon purple">&#9635;</span><div class="activity-copy"><p class="activity-title">Admin login</p><p class="activity-meta">superadmin@breachradar.io</p></div><span class="activity-time">30 min ago</span></li>
+          </ul>
+        </article>
+      </section>
+
+          </main>
+  </div>
+
+                <script>
+        const navLinks = document.querySelectorAll(".nav-link");
+        const navScroll = document.querySelector(".nav-scroll");
+        const scrollKey = "breachradar.sidebar.scrollTop";
+        if (navScroll) {
+            const savedTop = Number(sessionStorage.getItem(scrollKey) || "0");
+            if (savedTop > 0) {
+                navScroll.scrollTop = savedTop;
+            }
+            navScroll.addEventListener("scroll", () => {
+                sessionStorage.setItem(scrollKey, String(navScroll.scrollTop));
+            }, { passive: true });
+        }
+        const normalizePage = (page) => {
+            const value = (page || "").toLowerCase();
+            if (value === "dashboard.html") return "osint-dashboard.html";
+            if (value === "osint-inteligence.html") return "osint-intelligence.html";
+            return value;
+        };
+        const currentPage = normalizePage(decodeURIComponent(window.location.pathname.split("/").pop()) || "osint-dashboard.html");
+
+        navLinks.forEach((link) => {
+            const navText = link.textContent.replace(/\s+/g, " ").trim();
+            const sectionTitle = link.closest(".nav-section")?.querySelector(".section-heading")?.textContent.replace(/\s+/g, " ").trim() || "";
+            if (navText.startsWith("Dashboard") && sectionTitle.startsWith("OSINT")) {
+                link.href = "osint-dashboard.html";
+                link.dataset.page = "osint-dashboard.html";
+            } else if (navText.startsWith("User Management")) {
+                link.href = "user-management.html";
+                link.dataset.page = "user-management.html";
+            } else if (navText.startsWith("Verification Requests")) {
+                link.href = "varification-request.html";
+                link.dataset.page = "varification-request.html";
+            } else if (navText.startsWith("OSINT Intelligence")) {
+                link.href = "osint-intelligence.html";
+                link.dataset.page = "osint-intelligence.html";
+            }
+            const linkPage = normalizePage(link.dataset.page || decodeURIComponent(link.getAttribute("href") || ""));
+            link.classList.toggle("active", linkPage === currentPage);
+
+            if (link.getAttribute("href") === "#") {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+            } else {
+                link.addEventListener("click", () => {
+                    if (navScroll) {
+                        sessionStorage.setItem(scrollKey, String(navScroll.scrollTop));
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
